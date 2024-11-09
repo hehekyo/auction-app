@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
+import CreateBidModal from './CreateBidModal';
 
 type Bid = {
   id: number;
@@ -7,9 +8,8 @@ type Bid = {
   bidTime: Date;
 };
 
-type AuctionModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
+type Auction = {
+  id: number;
   sellerAddress: string;
   minBid: number;
   highestBid?: number;
@@ -18,48 +18,34 @@ type AuctionModalProps = {
   bids: Bid[];
 };
 
-export default function AuctionModal({
-  isOpen,
-  onClose,
-  sellerAddress,
-  minBid,
-  highestBid,
-  highestBidder,
-  endTime,
-  bids,
-}: AuctionModalProps) {
+type AuctionModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  id: number;
+};
+
+export default function AuctionModal({ isOpen, onClose, id }: AuctionModalProps) {
+  const [auction, setAuction] = useState<Auction | null>(null);
   const [isBidModalOpen, setIsBidModalOpen] = useState(false);
-  const [bidAmount, setBidAmount] = useState("");
 
-  if (!isOpen) return null;
-
-  const handleOpenBidModal = () => {
-    setIsBidModalOpen(true);
+  const fetchAuctionData = () => {
+    fetch(`/api/auctions/${id}`)
+      .then((response) => response.json())
+      .then((data) => setAuction(data))
+      .catch((error) => console.error("Failed to fetch auction data:", error));
   };
 
-  const handleCloseBidModal = () => {
-    setIsBidModalOpen(false);
-    setBidAmount("");
-  };
-
-  const handleBidSubmit = () => {
-    console.log("Bid Amount:", bidAmount);
-    handleCloseBidModal();
-  };
-
-  // Close modal when clicking outside of the modal content
-  const handleBackdropClick = (event: React.MouseEvent) => {
-    if (event.target === event.currentTarget) {
-      onClose();
+  useEffect(() => {
+    if (isOpen) {
+      fetchAuctionData();
     }
-  };
+  }, [isOpen, id]);
+
+  if (!isOpen || !auction) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-      onClick={handleBackdropClick}
-    >
-      <div className="relative bg-gray-800 p-6 rounded-lg w-4/5 h-4/5 overflow-y-auto text-gray-200" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="relative bg-gray-800 p-6 rounded-lg w-4/5 h-4/5 overflow-y-auto text-gray-200">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-white hover:text-gray-400"
@@ -67,13 +53,35 @@ export default function AuctionModal({
           ✕
         </button>
 
-        <h2 className="text-2xl font-bold mb-4">Auction Details</h2>
-        <p><strong>Seller Address:</strong> {sellerAddress}</p>
-        <p><strong>Minimum Bid:</strong> {minBid} ETH</p>
-        <p><strong>Highest Bid:</strong> {highestBid ? `${highestBid} ETH` : "No bids yet"}</p>
-        <p><strong>Highest Bidder:</strong> {highestBidder || "No bidder yet"}</p>
-        <p><strong>End Time:</strong> {new Date(endTime).toLocaleString()}</p>
+        <h2 className="text-2xl font-bold mb-6">Auction Details</h2>
 
+        {/* 左对齐的拍卖信息 */}
+        <div className="space-y-4 mb-6">
+          <div>
+            <span className="font-semibold text-gray-400">Seller Address:</span>
+            <span className="ml-2">{auction.sellerAddress}</span>
+          </div>
+          <div>
+            <span className="font-semibold text-gray-400">Minimum Bid:</span>
+            <span className="ml-2">{auction.minBid} ETH</span>
+          </div>
+          <div>
+            <span className="font-semibold text-gray-400">Highest Bid:</span>
+            <span className="ml-2">
+              {auction.highestBid ? `${auction.highestBid} ETH` : "No bids yet"}
+            </span>
+          </div>
+          <div>
+            <span className="font-semibold text-gray-400">Highest Bidder:</span>
+            <span className="ml-2">{auction.highestBidder || "No bidder yet"}</span>
+          </div>
+          <div>
+            <span className="font-semibold text-gray-400">End Time:</span>
+            <span className="ml-2">{new Date(auction.endTime).toLocaleString()}</span>
+          </div>
+        </div>
+
+        {/* 出价历史表格 */}
         <div className="mt-6">
           <h3 className="text-xl font-semibold mb-4">Bid History</h3>
           <div className="shadow-lg rounded-lg overflow-hidden">
@@ -86,8 +94,8 @@ export default function AuctionModal({
                 </tr>
               </thead>
               <tbody>
-                {bids.length > 0 ? (
-                  bids.map((bid) => (
+                {auction.bids.length > 0 ? (
+                  auction.bids.map((bid) => (
                     <tr key={bid.id} className="border-t border-gray-700">
                       <td className="px-6 py-4 text-sm font-medium">{bid.bidderAddress}</td>
                       <td className="px-6 py-4 text-sm">{bid.bidAmount}</td>
@@ -96,7 +104,9 @@ export default function AuctionModal({
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={3} className="px-6 py-4 text-center text-gray-400">No bids yet.</td>
+                    <td colSpan={3} className="px-6 py-4 text-center text-gray-400">
+                      No bids yet.
+                    </td>
                   </tr>
                 )}
               </tbody>
@@ -104,42 +114,33 @@ export default function AuctionModal({
           </div>
         </div>
 
-        <button
-          onClick={handleOpenBidModal}
-          className="mt-4 w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-500"
-        >
-          Bid
-        </button>
+        <div className="flex justify-end space-x-2 mt-6">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-600 text-gray-200 rounded-md hover:bg-gray-500 transition"
+          >
+            Close
+          </button>
+          <button
+            onClick={() => setIsBidModalOpen(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition"
+          >
+            Place Bid
+          </button>
+        </div>
       </div>
 
-      {isBidModalOpen && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black bg-opacity-50" onClick={handleCloseBidModal}>
-          <div className="bg-gray-800 p-6 rounded-lg w-1/3 text-gray-200" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-xl font-semibold mb-4">Place Your Bid</h3>
-            <input
-              type="number"
-              value={bidAmount}
-              onChange={(e) => setBidAmount(e.target.value)}
-              placeholder="Enter your bid amount"
-              className="w-full p-2 mb-4 text-black rounded"
-            />
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={handleCloseBidModal}
-                className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-500"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleBidSubmit}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-500"
-              >
-                Submit Bid
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* 出价模态窗口 */}
+      <CreateBidModal
+        isOpen={isBidModalOpen}
+        onClose={() => {
+          setIsBidModalOpen(false);
+          fetchAuctionData(); // 关闭模态窗口后重新获取拍卖数据
+        }}
+        auctionId={id}
+        minBid={auction.minBid}
+        highestBid={auction.highestBid}
+      />
     </div>
   );
 }

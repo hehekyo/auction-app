@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextApiRequest, NextApiResponse } from 'next';
 import db from '@/prisma';
 import jwt from 'jsonwebtoken';
 import { ethers } from 'ethers';

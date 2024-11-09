@@ -1,0 +1,37 @@
+// prisma/schema.prisma
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String @id @default(uuid())
+  wallet    String @unique
+  createdAt DateTime @default(now())
+}
+model Auction {
+  id             Int       @id @default(autoincrement())
+  sellerAddress  String
+  minBid         Float
+  highestBid     Float?
+  highestBidder  String?
+  endTime        DateTime
+  ended          Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  bids           Bid[]
+}
+
+model Bid {
+  id             Int       @id @default(autoincrement())
+  auctionId  Int
+  bidderAddress  String
+  bidAmount      Float
+  bidTime      DateTime  @default(now())
+  auction    Auction @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+}

@@ -1,17 +1,26 @@
-## [Nextjs](https://nextjs.org/) v14 (w/App Router) + [ConnectKit](https://family.co/) Example 
+# Introduction
+An auction system base on web3 implemeting with Next.js and solidity.
 
-This is a simple example of how to implement ConnectKit's Wallet connect functionality with [Next.js](https://nextjs.org/) App Router in TypeScript. 
+## Tech Stack
+- Next.js(react tyepscript)
+- solidity
+- prisma
+- tailwindcss
+- antd
+- etherjs
 
-## Getting started
-1. Clone this repo and install dependencies
-```sh
-git clone https://github.com/zkPeep/Nextjs14-ConnectKit.git
-cd Nextjs14-ConnectKit
-yarn install
+# Getting Started
+
+```
+pnpm install
+
+npx prisma db push
+npx prisma generate
+
+pnpm run dev
+
 ```
 
-2. Copy .env.example to .env.local
+# Deploy
 
-3. Setup a [WalletConnect project ID](https://cloud.walletconnect.com/sign-in)
-
-
+Deploy on Vercel

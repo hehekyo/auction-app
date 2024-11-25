@@ -6,9 +6,21 @@ import AuctionList from '../components/AuctionList';
 import Footer from '../components/Footer';
 import CreateAuctionModal from '../components/CreateAuctionModal';
 
+
+interface AuctionEvent {
+  type: string;
+  data: any;
+  timestamp: number;
+}
+
+
+
 export default function Home() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [refreshAuctionList, setRefreshAuctionList] = useState(false);
+
+  const [isListening, setIsListening] = useState(false)
+  const [events, setEvents] = useState<AuctionEvent[]>([])
 
   // 当模态窗口关闭时更新 refreshAuctionList，触发 AuctionList 重新加载
   const handleCloseCreateModal = () => {
@@ -16,9 +28,11 @@ export default function Home() {
     setRefreshAuctionList((prev) => !prev); // 切换 refresh 状态
   };
 
+  
   return (
     <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen flex flex-col">
       <Navbar />
+      
       <div className="container mx-auto p-6 flex-grow">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-3xl font-bold">Current Auctions</h2>

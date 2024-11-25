@@ -1,22 +1,40 @@
 import { useState, useEffect } from 'react';
 import AuctionCard from './AuctionCard';
 import AuctionModal from './AuctionModal';
+import * as ethers from 'ethers';
 
 type Bid = {
-  id: number;
-  bidderAddress: string;
-  bidAmount: number;
-  bidTime: Date;
+  bidder: string;
+  bidAmount: string;
+  timestamp: number;
+  transactionHash: string;
+  blockNumber: number;
 };
 
 type Auction = {
-  id: number;
-  sellerAddress: string;
-  minBid: number;
-  highestBid?: number;
-  highestBidder?: string;
-  endTime: Date;
+  auction: {
+    auctionId: string;
+    seller: string;
+    nftContract: string;
+    tokenId: string;
+    startingPrice: string;
+    reservePrice: string;
+    duration: string;
+    startTime: string;
+    endTime: string;
+    transactionHash: string;
+    blockNumber: number;
+    timestamp: number;
+  };
   bids: Bid[];
+  status: {
+    isEnded: boolean;
+  };
+};
+
+type ApiResponse = {
+  success: boolean;
+  data: Auction[];
 };
 
 type AuctionListProps = {
@@ -40,8 +58,12 @@ export default function AuctionList({ refresh }: AuctionListProps) {
       if (!response.ok) {
         throw new Error("Failed to fetch auctions");
       }
-      const data = await response.json();
-      setAuctions(data);
+      const data: ApiResponse = await response.json();
+      if (data.success) {
+        setAuctions(data.data);
+      } else {
+        throw new Error("Failed to fetch auctions");
+      }
     } catch (error) {
       setError((error as Error).message);
     } finally {
@@ -100,15 +122,18 @@ export default function AuctionList({ refresh }: AuctionListProps) {
   return (
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {currentAuctions.map((auction) => (
+        {currentAuctions.map((auctionData) => (
           <AuctionCard
-            key={auction.id}
-            id={auction.id}
-            sellerAddress={auction.sellerAddress}
-            minBid={auction.minBid}
-            highestBid={auction.highestBid}
-            endTime={auction.endTime}
-            onViewDetail={() => handleViewDetail(auction.id)}
+            key={auctionData.auction.auctionId}
+            id={parseInt(auctionData.auction.auctionId)}
+            transactionHash={auctionData.auction.transactionHash}
+            sellerAddress={auctionData.auction.seller}
+            minBid={ethers.formatEther(auctionData.auction.reservePrice)}
+            highestBid={auctionData.bids.length > 0 
+              ? ethers.formatEther(auctionData.bids[0].bidAmount)
+              : undefined}
+            endTime={new Date(parseInt(auctionData.auction.endTime) * 1000)}
+            onViewDetail={() => handleViewDetail(parseInt(auctionData.auction.auctionId))}
           />
         ))}
       </div>

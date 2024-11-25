@@ -9,7 +9,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "monitor-start": "ts-node services/index.ts"
   },
   "dependencies": {
     "@tanstack/query-core": "^5.17.15",

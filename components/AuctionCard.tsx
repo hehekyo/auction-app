@@ -10,6 +10,7 @@ type AuctionCardProps = {
 
 export default function AuctionCard({
   sellerAddress,
+  transactionHash,
   minBid,
   highestBid,
   endTime,
@@ -42,6 +43,8 @@ export default function AuctionCard({
       </div>
       <div className="p-6">
         <h5 className="text-xl font-medium text-gray-100">Seller: {formatAddress(sellerAddress)}</h5>
+        <h5 className="text-xl font-medium text-gray-100">TxHash: {transactionHash}</h5>
+
         <p className="text-base font-light text-gray-400">Minimum Bid: {minBid} ETH</p>
         <p className="text-base font-light text-gray-400">
           Highest Bid: {highestBid ? `${highestBid} ETH` : "No bids yet"}

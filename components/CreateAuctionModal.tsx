@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { ContractService } from '../services/contractService';
 
 type CreateAuctionModalProps = {
   isOpen: boolean;
@@ -7,8 +8,16 @@ type CreateAuctionModalProps = {
 
 export default function CreateAuctionModal({ isOpen, onClose }: CreateAuctionModalProps) {
   const [sellerAddress, setSellerAddress] = useState('');
-  const [minBid, setMinBid] = useState(0);
+  const [minBid, setMinBid] = useState(0.5);
   const [endTime, setEndTime] = useState('');
+  const [auctionType, setAuctionType] = useState(0);
+  const [startingPrice, setStartingPrice] = useState(0.5);
+  const [reservePrice, setReservePrice] = useState(0.5);
+  const [duration, setDuration] = useState(120);
+  const [nftContract, setNftContract] = useState('0x5FC8d32690cc91D4c39d9d3abcBD16989F875707');
+  const [tokenId, setTokenId] = useState(0);
+  const [priceDecrement, setPriceDecrement] = useState(0);
+  const [decrementInterval, setDecrementInterval] = useState(0);
 
   useEffect(() => {
     const wallet = localStorage.getItem('wallet');
@@ -17,39 +26,37 @@ export default function CreateAuctionModal({ isOpen, onClose }: CreateAuctionMod
     }
   }, []);
 
-  const handleCreateAuction = () => {
-    if (!sellerAddress || minBid <= 0 || !endTime) {
-      alert("Please fill all fields correctly.");
-      return;
-    }
-
-    const auctionData = {
-      sellerAddress,
-      minBid: parseFloat(minBid.toString()),
-      endTime: new Date(endTime),
-    };
-
-    // 调用 API 创建拍卖
-    fetch('/api/auctions/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(auctionData),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Failed to create auction');
+  const handleCreateAuction = async () => {
+    try {
+      const contractService = ContractService.getInstance();
+      const durationInSeconds = Math.floor(duration * 3600);
+      
+      const txHash = await contractService.createAuction(
+        auctionType,
+        startingPrice,
+        reservePrice,
+        durationInSeconds,
+        nftContract,
+        tokenId,
+        priceDecrement,
+        decrementInterval
+      );
+      
+      console.log('拍卖创建成功:', txHash);
+      alert('拍卖创建成功！');
+      onClose();
+    } catch (error) {
+      console.error('创建拍卖时出错:', error);
+      if (error instanceof Error) {
+        if (error.message.includes('请安装 MetaMask')) {
+          alert('请先安装 MetaMask 钱包\n访问 https://metamask.io/download/ 安装');
+        } else {
+          alert(error.message);
         }
-        return response.json();
-      })
-      .then((data) => {
-        console.log('Auction created:', data);
-        onClose(); // 关闭模态窗口
-      })
-      .catch((error) => {
-        console.error('An error occurred:', error);
-      });
+      } else {
+        alert('创建拍卖失败');
+      }
+    }
   };
 
   if (!isOpen) return null;
@@ -57,37 +64,93 @@ export default function CreateAuctionModal({ isOpen, onClose }: CreateAuctionMod
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
       <div className="bg-gray-800 text-gray-200 p-6 rounded-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4">Create New Auction</h2>
+        <h2 className="text-2xl font-bold mb-4">创建新拍卖</h2>
         
         <label className="block mb-4">
-          <span className="text-gray-300">Seller Address</span>
-          <input
-            type="text"
+          <span className="text-gray-300">拍卖类型</span>
+          <select
             className="w-full p-2 mt-1 bg-gray-700 text-gray-100 border border-gray-600 rounded-md focus:outline-none"
-            value={sellerAddress}
-            readOnly
-          />
+            value={auctionType}
+            onChange={(e) => setAuctionType(Number(e.target.value))}
+          >
+            <option value={0}>英式拍卖</option>
+            <option value={1}>荷兰式拍卖</option>
+          </select>
         </label>
 
         <label className="block mb-4">
-          <span className="text-gray-300">Minimum Bid (ETH)</span>
+          <span className="text-gray-300">起始价格 (ETH)</span>
           <input
             type="number"
             className="w-full p-2 mt-1 bg-gray-700 text-gray-100 border border-gray-600 rounded-md focus:outline-none"
-            value={minBid}
-            onChange={(e) => setMinBid(parseFloat(e.target.value))}
+            value={startingPrice}
+            onChange={(e) => setStartingPrice(parseFloat(e.target.value))}
           />
         </label>
 
         <label className="block mb-4">
-          <span className="text-gray-300">End Time</span>
+          <span className="text-gray-300">保留价格 (ETH)</span>
           <input
-            type="datetime-local"
+            type="number"
             className="w-full p-2 mt-1 bg-gray-700 text-gray-100 border border-gray-600 rounded-md focus:outline-none"
-            value={endTime}
-            onChange={(e) => setEndTime(e.target.value)}
+            value={reservePrice}
+            onChange={(e) => setReservePrice(parseFloat(e.target.value))}
           />
         </label>
+
+        <label className="block mb-4">
+          <span className="text-gray-300">持续时间 (小时)</span>
+          <input
+            type="number"
+            className="w-full p-2 mt-1 bg-gray-700 text-gray-100 border border-gray-600 rounded-md focus:outline-none"
+            value={duration}
+            onChange={(e) => setDuration(parseFloat(e.target.value))}
+          />
+        </label>
+
+        <label className="block mb-4">
+          <span className="text-gray-300">NFT 合约地址</span>
+          <input
+            type="text"
+            className="w-full p-2 mt-1 bg-gray-700 text-gray-100 border border-gray-600 rounded-md focus:outline-none"
+            value={nftContract}
+            onChange={(e) => setNftContract(e.target.value)}
+          />
+        </label>
+
+        <label className="block mb-4">
+          <span className="text-gray-300">Token ID</span>
+          <input
+            type="number"
+            className="w-full p-2 mt-1 bg-gray-700 text-gray-100 border border-gray-600 rounded-md focus:outline-none"
+            value={tokenId}
+            onChange={(e) => setTokenId(parseInt(e.target.value))}
+          />
+        </label>
+
+        {auctionType === 1 && (
+          <>
+            <label className="block mb-4">
+              <span className="text-gray-300">价格递减量 (ETH)</span>
+              <input
+                type="number"
+                className="w-full p-2 mt-1 bg-gray-700 text-gray-100 border border-gray-600 rounded-md focus:outline-none"
+                value={priceDecrement}
+                onChange={(e) => setPriceDecrement(parseFloat(e.target.value))}
+              />
+            </label>
+
+            <label className="block mb-4">
+              <span className="text-gray-300">递减间隔 (秒)</span>
+              <input
+                type="number"
+                className="w-full p-2 mt-1 bg-gray-700 text-gray-100 border border-gray-600 rounded-md focus:outline-none"
+                value={decrementInterval}
+                onChange={(e) => setDecrementInterval(parseInt(e.target.value))}
+              />
+            </label>
+          </>
+        )}
 
         <div className="flex justify-end space-x-2">
           <button
@@ -107,3 +170,4 @@ export default function CreateAuctionModal({ isOpen, onClose }: CreateAuctionMod
     </div>
   );
 }
+

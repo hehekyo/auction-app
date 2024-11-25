@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { BidService } from '../services/bidService';
 
 type CreateBidModalProps = {
   isOpen: boolean;
@@ -20,13 +21,12 @@ export default function CreateBidModal({ isOpen, onClose, auctionId, minBid, hig
     }
   }, []);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!bidderAddress) {
       alert("Bidder address is missing.");
       return;
     }
     
-    // 检查出价是否低于最低出价或当前最高出价
     if (bidAmount < minBid) {
       setError(`Bid must be at least ${minBid} ETH.`);
       return;
@@ -37,33 +37,15 @@ export default function CreateBidModal({ isOpen, onClose, auctionId, minBid, hig
       return;
     }
 
-    // 构建请求数据
-    const bidData = {
-      auctionId,
-      bidderAddress,
-      bidAmount,
-    };
-
-    fetch('/api/bids/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(bidData),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Failed to place bid');
-        }
-        return response.json();
-      })
-      .then((data) => {
-        console.log('Bid placed:', data);
-        onClose(); // 关闭模态窗口
-      })
-      .catch((error) => {
-        console.error('An error occurred:', error);
-      });
+    try {
+      // const bidService = BidService.getInstance();
+      // const txHash = await bidService.placeBid(auctionId, bidAmount);
+      // console.log('投标成功，交易哈希:', txHash);
+      onClose(); // 关闭模态窗口
+    } catch (error) {
+      console.error('投标失败:', error);
+      setError('投标失败，请检查您的钱包连接并确保有足够的 ETH');
+    }
   };
 
   if (!isOpen) return null;

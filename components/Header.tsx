@@ -5,41 +5,17 @@ import Image from 'next/image';
 import { ConnectKitButton } from 'connectkit';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { FaWallet } from 'react-icons/fa';
+import TokenDrawer from './TokenDrawer';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { address, isConnected } = useAccount();
   const pathname = usePathname();
 
-  useEffect(() => {
-    const login = async (wallet: string) => {
-      try {
-        const response = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ wallet }),
-        });
-
-        if (response.ok) {
-          const { token, wallet } = await response.json();
-          localStorage.setItem('token', token);
-          localStorage.setItem('wallet', wallet);
-          console.log('Logged in successfully');
-        } else {
-          console.error('Login failed');
-        }
-      } catch (error) {
-        console.error('An error occurred during login:', error);
-      }
-    };
-
-    if (isConnected && address) {
-      login(address);
-    }
-  }, [address, isConnected]);
-
   return (
-    <header className="lg:px-16 px-4 flex flex-wrap items-center py-2 shadow-lg bg-gray-900 text-gray-100 dark:bg-gray-800">
+    <header className="lg:px-16 px-4 flex flex-wrap items-center py-2 shadow-lg bg-gray-900 text-gray-100 dark:bg-gray-800 relative">
       <div className="flex-1 flex items-center gap-8">
         <Link href="/" className="flex items-center">
           <Image
@@ -82,6 +58,33 @@ export default function Header() {
         </nav>
       </div>
 
+      {/* Wallet and Connect Button */}
+      <div className="flex items-center gap-4">
+        <div className="md:block">
+          <ConnectKitButton.Custom>
+            {({ isConnected, show, truncatedAddress, ensName }) => {
+              return (
+                <button
+                  onClick={() => {
+                    if (isConnected) {
+                      setIsDrawerOpen(true);
+                    } else {
+                      show();
+                    }
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                >
+                  <FaWallet className="text-lg" />
+                  <span className="hidden md:inline">
+                    {isConnected ? (ensName || truncatedAddress) : "Connect Wallet"}
+                  </span>
+                </button>
+              );
+            }}
+          </ConnectKitButton.Custom>
+        </div>
+      </div>
+
       {/* Mobile menu toggle */}
       <button
         onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -92,11 +95,6 @@ export default function Header() {
           <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z"></path>
         </svg>
       </button>
-
-      {/* Connect Wallet Button */}
-      <div className="md:block ml-4">
-        <ConnectKitButton />
-      </div>
 
       {/* Mobile Navigation Menu */}
       {isMenuOpen && (
@@ -123,6 +121,12 @@ export default function Header() {
           </nav>
         </div>
       )}
+
+      {/* Token Balance Drawer */}
+      <TokenDrawer 
+        isOpen={isDrawerOpen} 
+        onClose={() => setIsDrawerOpen(false)} 
+      />
     </header>
   );
 }

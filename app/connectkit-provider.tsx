@@ -5,11 +5,8 @@ import { ConnectKitProvider, getDefaultConfig } from "connectkit";
 
 const config = createConfig(
   getDefaultConfig({
-  
     alchemyId: process.env.ALCHEMY_ID,
     walletConnectProjectId: process.env.WALLETCONNECT_PROJECT_ID || "",
-
-    
     appName: 'Nextjs14 ConnectKit',
     appDescription: 'Nextjs14 - ConnectKit',
     appUrl: 'https://family.co',

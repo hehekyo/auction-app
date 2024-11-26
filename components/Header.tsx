@@ -1,11 +1,15 @@
+"use client"
 import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import Image from 'next/image';
 import { ConnectKitButton } from 'connectkit';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { address, isConnected } = useAccount();
+  const pathname = usePathname();
 
   useEffect(() => {
     const login = async (wallet: string) => {
@@ -36,16 +40,46 @@ export default function Header() {
 
   return (
     <header className="lg:px-16 px-4 flex flex-wrap items-center py-2 shadow-lg bg-gray-900 text-gray-100 dark:bg-gray-800">
-      <div className="flex-1 flex justify-between items-center">
-      <Image
-  src="/logo.png"
-  alt="DAuction Logo"
-  width={80} // 确保分辨率清晰
-  height={80}
-  className="w-[80px] h-[80px] object-contain rounded-full" // 添加 'rounded-full' 使图片呈现圆形
-  priority // 预加载图片以获得更清晰的渲染
-  unoptimized // 不进行额外的图像优化处理
-/>
+      <div className="flex-1 flex items-center gap-8">
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/logo.png"
+            alt="DAuction Logo"
+            width={80}
+            height={80}
+            className="w-[80px] h-[80px] object-contain rounded-full bg-white"
+            priority
+            unoptimized
+          />
+        </Link>
+
+        {/* Desktop Navigation Menu */}
+        <nav className="hidden md:flex items-center gap-6 font-bold ">
+        <Link 
+            href="/"
+            className={`hover:text-blue-400 transition ${
+              pathname === '/' ? 'text-blue-400' : ''
+            }`}
+          >
+            Home
+          </Link>
+          <Link 
+            href="/swap"
+            className={`hover:text-blue-400 transition ${
+              pathname === '/swap' ? 'text-blue-400' : ''
+            }`}
+          >
+            Swap
+          </Link>
+          <Link 
+            href="/auctions"
+            className={`hover:text-blue-400 transition ${
+              pathname === '/auctions' ? 'text-blue-400' : ''
+            }`}
+          >
+            Auctions
+          </Link>
+        </nav>
       </div>
 
       {/* Mobile menu toggle */}
@@ -59,10 +93,36 @@ export default function Header() {
         </svg>
       </button>
 
-      {/* Connect Wallet Button (for larger screens) */}
+      {/* Connect Wallet Button */}
       <div className="md:block ml-4">
         <ConnectKitButton />
       </div>
+
+      {/* Mobile Navigation Menu */}
+      {isMenuOpen && (
+        <div className="md:hidden w-full mt-4">
+          <nav className="flex flex-col gap-4">
+            <Link 
+              href="/swap"
+              className={`hover:text-blue-400 transition ${
+                pathname === '/swap' ? 'text-blue-400' : ''
+              }`}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Swap
+            </Link>
+            <Link 
+              href="/auctions"
+              className={`hover:text-blue-400 transition ${
+                pathname === '/auctions' ? 'text-blue-400' : ''
+              }`}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Auctions
+            </Link>
+          </nav>
+        </div>
+      )}
     </header>
   );
 }

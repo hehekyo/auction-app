@@ -40,7 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // 使用示例
 const provider = new ethers.JsonRpcProvider('http://127.0.0.1:8545');
-const contractAddress = '0x63fea6E447F120B8Faf85B53cdaD8348e645D80E';
+const contractAddress = '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9';
 
 const latestBlock = await provider.getBlockNumber();
 

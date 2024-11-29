@@ -1,51 +1,54 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAccount } from 'wagmi';
 import { useRouter } from 'next/navigation';
-import AuctionCard from '@/components/AuctionCard';
+import NFTCard from '@/components/NFTCard';
 
-interface Auction {
-  id: number;
+interface NFT {
+  id: string;
   name: string;
   image: string;
-  sellerAddress: string;
-  minBid: number;
-  highestBid?: number;
-  highestBidder?: string;
-  endTime: Date;
+  price: string;
+  tokenId: string;
+  contractAddress: string;
 }
 
-export default function AuctionsPage() {
+export default function MyNFTsPage() {
   const router = useRouter();
-  const [auctions, setAuctions] = useState<Auction[]>([]);
+  const { address, isConnected } = useAccount();
+  const [nfts, setNfts] = useState<NFT[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchAuctions = async () => {
+    if (!isConnected) {
+      router.push('/');
+      return;
+    }
+
+    const fetchMyNFTs = async () => {
       try {
-        const response = await fetch('/api/auctions');
+        const response = await fetch('/api/nfts/my-nfts');
         if (!response.ok) {
-          throw new Error('Failed to fetch auctions');
+          throw new Error('Failed to fetch NFTs');
         }
         const data = await response.json();
-        console.log("======fetchAuctions data",data.data);
-        
-        setAuctions(data.data);
+        setNfts(data);
       } catch (error) {
-        console.error('Error fetching auctions:', error);
-        setError('Failed to load auctions. Please try again later.');
+        console.error('Error fetching NFTs:', error);
+        setError('Failed to load NFTs. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAuctions();
-  }, []);
+    fetchMyNFTs();
+  }, [isConnected, router]);
 
-  const handleViewDetail = (auctionId: number) => {
-    router.push(`/auctions/${auctionId}`);
-  };
+  if (!isConnected) {
+    return null; // 页面会被重定向
+  }
 
   if (loading) {
     return (
@@ -74,32 +77,24 @@ export default function AuctionsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-100">Live Auctions</h1>
-        <p className="text-gray-400 mt-2">
-          Discover and bid on unique NFTs from our community
-        </p>
-      </div>
-
-      {/* Auctions Grid */}
-      {auctions.length === 0 ? (
+      <h1 className="text-3xl font-bold mb-8 text-gray-100">My NFT Collection</h1>
+      
+      {nfts.length === 0 ? (
         <div className="text-center text-gray-400 py-12">
-          <p className="mb-4">No active auctions at the moment</p>
+          <p className="mb-4">You don't own any NFTs yet</p>
           <button
-            onClick={() => router.push('/create-auction')}
+            onClick={() => router.push('/nfts')}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
           >
-            Create Auction
+            Browse NFTs
           </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {auctions.map((auction) => (
-            <AuctionCard
-              key={auction.args.auctionId}
-              {...auction.args}
-              onViewDetail={() => handleViewDetail(auction.args.auctionId)}
+          {nfts.map((nft) => (
+            <NFTCard
+              key={nft.id}
+              {...nft}
             />
           ))}
         </div>

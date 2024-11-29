@@ -55,6 +55,14 @@ export default function Header() {
           >
             Auctions
           </Link>
+          <Link 
+            href="/nfts"
+            className={`hover:text-blue-400 transition ${
+              pathname === '/nfts' ? 'text-blue-400' : ''
+            }`}
+          >
+            NFTs
+          </Link>
         </nav>
       </div>
 
@@ -63,15 +71,17 @@ export default function Header() {
         <div className="md:block">
           <ConnectKitButton.Custom>
             {({ isConnected, show, truncatedAddress, ensName }) => {
+              const handleClick = () => {
+                if (isConnected) {
+                  setIsDrawerOpen(true);
+                } else if (show) {
+                  show();
+                }
+              };
+
               return (
                 <button
-                  onClick={() => {
-                    if (isConnected) {
-                      setIsDrawerOpen(true);
-                    } else {
-                      show();
-                    }
-                  }}
+                  onClick={handleClick}
                   className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
                 >
                   <FaWallet className="text-lg" />
@@ -101,6 +111,15 @@ export default function Header() {
         <div className="md:hidden w-full mt-4">
           <nav className="flex flex-col gap-4">
             <Link 
+              href="/"
+              className={`hover:text-blue-400 transition ${
+                pathname === '/' ? 'text-blue-400' : ''
+              }`}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Home
+            </Link>
+            <Link 
               href="/swap"
               className={`hover:text-blue-400 transition ${
                 pathname === '/swap' ? 'text-blue-400' : ''
@@ -117,6 +136,15 @@ export default function Header() {
               onClick={() => setIsMenuOpen(false)}
             >
               Auctions
+            </Link>
+            <Link 
+              href="/nfts"
+              className={`hover:text-blue-400 transition ${
+                pathname === '/nfts' ? 'text-blue-400' : ''
+              }`}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              NFTs
             </Link>
           </nav>
         </div>

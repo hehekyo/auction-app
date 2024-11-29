@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { ethers } from 'ethers';
@@ -6,13 +8,19 @@ import DatTokenIcon from '@/public/token.png';
 import Image from 'next/image';
 
 export default function TokenSwap() {
+  const [mounted, setMounted] = useState(false);
   const [fromToken, setFromToken] = useState<'ETH' | 'DAT'>('ETH');
   const [toToken, setToToken] = useState<'ETH' | 'DAT'>('DAT');
   const [fromAmount, setFromAmount] = useState<string>('');
   const [toAmount, setToAmount] = useState<string>('');
-  const [exchangeRate, setExchangeRate] = useState<number>(2000); // 1 ETH = 1000 DAT
-  const [slippage, setSlippage] = useState<number>(0.5); // 0.5% 滑点
+  const [exchangeRate, setExchangeRate] = useState<number>(2000);
+  const [slippage, setSlippage] = useState<number>(0.5);
   const { address, isConnected } = useAccount();
+
+  // 添加 mounted 状态来处理水合问题
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // 切换代币位置
   const handleSwapTokens = () => {
@@ -71,8 +79,20 @@ export default function TokenSwap() {
     return null;
   };
 
+  // 如果还没有挂载，返回一个加载状态或空内容
+  if (!mounted) {
+    return (
+      <div className="w-full max-w-xl mx-auto bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-700">
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-gray-100 mb-6">Token Swap</h2>
+          {/* 显示加载状态的UI */}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full max-w-xl mx-auto bg-gray-800 rounded-2xl p-6 shadow-lg">
+    <div className="w-full max-w-xl mx-auto bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-700">
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-gray-100 mb-6">Token Swap</h2>
         
@@ -160,11 +180,15 @@ export default function TokenSwap() {
               : 'bg-gray-600 text-gray-400 cursor-not-allowed'
           } transition-colors`}
         >
-          {!isConnected 
-            ? 'Connect Wallet' 
-            : !fromAmount || Number(fromAmount) <= 0
-            ? 'Enter Amount'
-            : 'Confirm Swap'}
+          {mounted && (
+            <>
+              {!isConnected 
+                ? 'Connect Wallet' 
+                : !fromAmount || Number(fromAmount) <= 0
+                ? 'Enter Amount'
+                : 'Confirm Swap'}
+            </>
+          )}
         </button>
       </div>
     </div>

@@ -1,64 +1,96 @@
+import Image from 'next/image';
+import { FaEthereum } from 'react-icons/fa';
+
 type AuctionCardProps = {
   id: number;
-  sellerAddress: string;
-  minBid: number;
+  name: string;
+  image: string;
+  seller: string;
+  initialBid: number;
   highestBid?: number;
-  highestBidder?: string;
   endTime: Date;
   onViewDetail: () => void;
 };
 
 export default function AuctionCard({
-  sellerAddress,
-  transactionHash,
-  minBid,
-  highestBid,
+  name,
+  image = '/nfts/1.jpg',
+  seller,
+  initialBid,
+  highestBid = 1000,
   endTime,
   onViewDetail,
 }: AuctionCardProps) {
-  // 计算拍卖状态
-  const isOngoing = new Date() < new Date(endTime);
-
-  // 将地址格式化为省略形式
-  const formatAddress = (address: string) =>
-    `${address.slice(0, 6)}...${address.slice(-4)}`;
+  // const isOngoing = new Date() < new Date(endTime);
+  const isOngoing = true;
+  console.log("====sellerAddress",seller);
+  
+  const formatAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(-4)}`;
 
   return (
-    <div className="relative flex w-full max-w-md flex-col rounded-xl bg-gray-800 text-gray-200 shadow-lg">
-      {/* 状态标签 */}
-      <div
-        className={`absolute top-4 left-4 px-3 py-1 text-sm font-semibold rounded-full text-white ${
-          isOngoing ? 'bg-green-500' : 'bg-red-500'
-        } z-10`}
-      >
-        {isOngoing ? 'Ongoing' : 'Ended'}
-      </div>
-      <div className="relative mx-4 mt-4 overflow-hidden rounded-xl bg-gray-700 shadow-lg">
-        <img
-          src="https://images.unsplash.com/photo-1499696010180-025ef6e1a8f9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
-          alt="Auction Image"
-          className="object-cover w-full h-48 rounded-xl opacity-90"
+    <div 
+      onClick={onViewDetail}
+      className="bg-gray-800/70 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-700/50
+        cursor-pointer transition-transform duration-300 hover:scale-105"
+    >
+      {/* Image Container */}
+      <div className="relative aspect-square">
+        <Image
+          src={image}
+          alt={name}
+          fill
+          className="object-cover transition-transform duration-300"
         />
-        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-transparent to-black/70"></div>
+        <div className="absolute top-2 right-2">
+          <span className={`px-2 py-1 rounded-full text-xs font-semibold
+            ${isOngoing 
+              ? 'bg-green-500/80 text-white' 
+              : 'bg-red-500/80 text-white'}`}
+          >
+            {isOngoing ? 'Live' : 'Ended'}
+          </span>
+        </div>
       </div>
-      <div className="p-6">
-        <h5 className="text-xl font-medium text-gray-100">Seller: {formatAddress(sellerAddress)}</h5>
-        <h5 className="text-xl font-medium text-gray-100">TxHash: {transactionHash}</h5>
 
-        <p className="text-base font-light text-gray-400">Minimum Bid: {minBid} ETH</p>
-        <p className="text-base font-light text-gray-400">
-          Highest Bid: {highestBid ? `${highestBid} ETH` : "No bids yet"}
-        </p>
-        <p className="text-base font-light text-gray-400">
-          Ends at: {new Date(endTime).toLocaleString()}
-        </p>
-      </div>
-      <div className="p-6 pt-3">
+      {/* Content */}
+      <div className="p-4">
+        <h3 className="text-lg font-semibold text-gray-100 mb-2">{name}</h3>
+        
+        <div className="space-y-2 text-sm">
+          <div className="flex justify-between items-center">
+            <span className="text-gray-400">Seller</span>
+            <span className="text-gray-200">{formatAddress(seller)}</span>
+          </div>
+          
+          <div className="flex justify-between items-center">
+            <span className="text-gray-400">Min Bid</span>
+            <div className="flex items-center gap-1 text-gray-200">
+              <FaEthereum className="text-blue-400" />
+              <span>{initialBid} ETH</span>
+            </div>
+          </div>
+
+          {highestBid && (
+            <div className="flex justify-between items-center">
+              <span className="text-gray-400">Current Bid</span>
+              <div className="flex items-center gap-1 text-gray-200">
+                <FaEthereum className="text-blue-400" />
+                <span>{highestBid} ETH</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* View Detail Button */}
         <button
-          onClick={onViewDetail}
-          className="w-full rounded-lg bg-blue-600 py-3.5 text-white font-bold uppercase transition-all hover:bg-blue-500"
+          onClick={(e) => {
+            e.stopPropagation();
+            onViewDetail();
+          }}
+          className="w-full mt-4 rounded-lg bg-blue-600 py-2.5 px-4 text-white font-semibold
+            transition-all hover:bg-blue-500 hover:shadow-lg flex items-center justify-center gap-2"
         >
-          View Detail
+          View Details
         </button>
       </div>
     </div>

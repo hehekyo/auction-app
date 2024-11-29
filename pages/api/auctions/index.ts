@@ -39,17 +39,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // }
 
   // 使用示例
-const provider = new ethers.JsonRpcProvider('http://127.0.0.1:8545');
-const contractAddress = '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9';
+  if (!process.env.RPC_URL || !process.env.CONTRACT_ADDRESS) {
+    throw new Error('Missing RPC_URL or CONTRACT_ADDRESS in environment variables');
+  }
+  
+const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
+const contractAddress = process.env.CONTRACT_ADDRESS
 
 const latestBlock = await provider.getBlockNumber();
 
-const auctions = await getAuctionsWithBids(
+// const auctions = await getAuctionsWithBids(
+//   provider,
+//   contractAddress,
+//   0, // fromBlock
+//   latestBlock // toBlock
+// );
+const auctions = await getAuctionStartedEvents(
   provider,
   contractAddress,
   0, // fromBlock
   latestBlock // toBlock
 );
+
 console.log("============latestBlock=============",latestBlock);
 
 
@@ -60,9 +71,12 @@ console.log("============latestBlock=============",latestBlock);
 //   latestBlock // toBlock
 // );
 
-res.status(200).json(auctions);
 
 console.log("============chain auctions=============",auctions);
+
+res.status(200).json(auctions);
+
+
 
 // 获取特定拍卖的所有信息
 

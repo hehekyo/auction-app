@@ -10,7 +10,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "monitor-start": "ts-node services/index.ts"
+    "monitor-start": "ts-node services/index.ts",
+    "upload-nfts": "ts-node scripts/upload.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
@@ -19,8 +20,11 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "connectkit": "^1.6.0",
+    "dotenv": "^16.4.5",
     "ethers": "^6.10.0",
+    "framer-motion": "^11.11.17",
     "jsonwebtoken": "^9.0.2",
+    "mime-types": "^2.1.35",
     "next": "14.0.4",
     "nextjs14-connectkit": "file:",
     "prisma": "^5.22.0",
@@ -30,6 +34,7 @@
     "tailwind-variants": "^0.1.20",
     "viem": "^1.21.1",
     "wagmi": "^1.4.12",
+    "web3.storage": "^4.5.5",
     "yarn": "^1.22.21"
   },
   "devDependencies": {

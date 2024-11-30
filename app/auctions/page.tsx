@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AuctionCard from '@/components/AuctionCard';
+import CreateAuctionModal from '@/components/CreateAuctionModal';
+import { FaPlus } from 'react-icons/fa';
 
 interface Auction {
   id: number;
@@ -20,6 +22,7 @@ export default function AuctionsPage() {
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchAuctions = async () => {
@@ -74,12 +77,23 @@ export default function AuctionsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-100">Live Auctions</h1>
-        <p className="text-gray-400 mt-2">
-          Discover and bid on unique NFTs from our community
-        </p>
+      {/* Header with Create Button */}
+      <div className="mb-8 flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-100">Live Auctions</h1>
+          <p className="text-gray-400 mt-2">
+            Discover and bid on unique NFTs from our community
+          </p>
+        </div>
+        
+        <button
+          onClick={() => setIsCreateModalOpen(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg 
+            hover:bg-blue-700 transition-colors"
+        >
+          <FaPlus className="w-4 h-4" />
+          <span>Create Auction</span>
+        </button>
       </div>
 
       {/* Auctions Grid */}
@@ -87,7 +101,7 @@ export default function AuctionsPage() {
         <div className="text-center text-gray-400 py-12">
           <p className="mb-4">No active auctions at the moment</p>
           <button
-            onClick={() => router.push('/create-auction')}
+            onClick={() => setIsCreateModalOpen(true)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
           >
             Create Auction
@@ -104,6 +118,16 @@ export default function AuctionsPage() {
           ))}
         </div>
       )}
+
+      {/* Create Auction Modal */}
+      <CreateAuctionModal
+        isOpen={isCreateModalOpen}
+        onClose={() => {
+          setIsCreateModalOpen(false);
+          // 可选：刷新拍卖列表
+          fetchAuctions();
+        }}
+      />
     </div>
   );
 } 

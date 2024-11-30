@@ -42,19 +42,19 @@ export default function CreateAuctionModal({ isOpen, onClose }: CreateAuctionMod
         decrementInterval
       );
       
-      console.log('拍卖创建成功:', txHash);
-      alert('拍卖创建成功！');
+      console.log('Auction created successfully:', txHash);
+      alert('Auction created successfully!');
       onClose();
     } catch (error) {
-      console.error('创建拍卖时出错:', error);
+      console.error('Error creating auction:', error);
       if (error instanceof Error) {
-        if (error.message.includes('请安装 MetaMask')) {
-          alert('请先安装 MetaMask 钱包\n访问 https://metamask.io/download/ 安装');
+        if (error.message.includes('Please install MetaMask')) {
+          alert('Please install MetaMask wallet\nVisit https://metamask.io/download/ to install');
         } else {
           alert(error.message);
         }
       } else {
-        alert('创建拍卖失败');
+        alert('Failed to create auction');
       }
     }
   };
@@ -64,22 +64,22 @@ export default function CreateAuctionModal({ isOpen, onClose }: CreateAuctionMod
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
       <div className="bg-gray-800 text-gray-200 p-6 rounded-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4">创建新拍卖</h2>
+        <h2 className="text-2xl font-bold mb-4">Create New Auction</h2>
         
         <label className="block mb-4">
-          <span className="text-gray-300">拍卖类型</span>
+          <span className="text-gray-300">Auction Type</span>
           <select
             className="w-full p-2 mt-1 bg-gray-700 text-gray-100 border border-gray-600 rounded-md focus:outline-none"
             value={auctionType}
             onChange={(e) => setAuctionType(Number(e.target.value))}
           >
-            <option value={0}>英式拍卖</option>
-            <option value={1}>荷兰式拍卖</option>
+            <option value={0}>English Auction</option>
+            <option value={1}>Dutch Auction</option>
           </select>
         </label>
 
         <label className="block mb-4">
-          <span className="text-gray-300">起始价格 (ETH)</span>
+          <span className="text-gray-300">Starting Price (DAT)</span>
           <input
             type="number"
             className="w-full p-2 mt-1 bg-gray-700 text-gray-100 border border-gray-600 rounded-md focus:outline-none"
@@ -89,7 +89,7 @@ export default function CreateAuctionModal({ isOpen, onClose }: CreateAuctionMod
         </label>
 
         <label className="block mb-4">
-          <span className="text-gray-300">保留价格 (ETH)</span>
+          <span className="text-gray-300">Reserve Price (DAT)</span>
           <input
             type="number"
             className="w-full p-2 mt-1 bg-gray-700 text-gray-100 border border-gray-600 rounded-md focus:outline-none"
@@ -99,7 +99,7 @@ export default function CreateAuctionModal({ isOpen, onClose }: CreateAuctionMod
         </label>
 
         <label className="block mb-4">
-          <span className="text-gray-300">持续时间 (小时)</span>
+          <span className="text-gray-300">Duration (Hours)</span>
           <input
             type="number"
             className="w-full p-2 mt-1 bg-gray-700 text-gray-100 border border-gray-600 rounded-md focus:outline-none"
@@ -109,7 +109,7 @@ export default function CreateAuctionModal({ isOpen, onClose }: CreateAuctionMod
         </label>
 
         <label className="block mb-4">
-          <span className="text-gray-300">NFT 合约地址</span>
+          <span className="text-gray-300">NFT Contract Address</span>
           <input
             type="text"
             className="w-full p-2 mt-1 bg-gray-700 text-gray-100 border border-gray-600 rounded-md focus:outline-none"
@@ -131,7 +131,7 @@ export default function CreateAuctionModal({ isOpen, onClose }: CreateAuctionMod
         {auctionType === 1 && (
           <>
             <label className="block mb-4">
-              <span className="text-gray-300">价格递减量 (ETH)</span>
+              <span className="text-gray-300">Price Decrement (DAT)</span>
               <input
                 type="number"
                 className="w-full p-2 mt-1 bg-gray-700 text-gray-100 border border-gray-600 rounded-md focus:outline-none"
@@ -141,7 +141,7 @@ export default function CreateAuctionModal({ isOpen, onClose }: CreateAuctionMod
             </label>
 
             <label className="block mb-4">
-              <span className="text-gray-300">递减间隔 (秒)</span>
+              <span className="text-gray-300">Decrement Interval (Seconds)</span>
               <input
                 type="number"
                 className="w-full p-2 mt-1 bg-gray-700 text-gray-100 border border-gray-600 rounded-md focus:outline-none"

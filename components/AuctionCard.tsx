@@ -1,5 +1,8 @@
 import Image from 'next/image';
 import { FaEthereum } from 'react-icons/fa';
+import { SiBasicattentiontoken } from "react-icons/si";
+import { MdToken } from "react-icons/md";
+
 
 type AuctionCardProps = {
   id: number;
@@ -65,8 +68,8 @@ export default function AuctionCard({
           <div className="flex justify-between items-center">
             <span className="text-gray-400">Min Bid</span>
             <div className="flex items-center gap-1 text-gray-200">
-              <FaEthereum className="text-blue-400" />
-              <span>{initialBid} ETH</span>
+              <MdToken className="text-blue-400" />
+              <span>{initialBid} DAT</span>
             </div>
           </div>
 
@@ -74,8 +77,8 @@ export default function AuctionCard({
             <div className="flex justify-between items-center">
               <span className="text-gray-400">Current Bid</span>
               <div className="flex items-center gap-1 text-gray-200">
-                <FaEthereum className="text-blue-400" />
-                <span>{highestBid} ETH</span>
+                <MdToken className="text-blue-400" />
+                <span>{highestBid} DAT</span>
               </div>
             </div>
           )}

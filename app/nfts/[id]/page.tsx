@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { FaEthereum } from 'react-icons/fa';
 import { useAccount } from 'wagmi';
 import { parseEther } from 'viem';
+import { MdToken } from "react-icons/md";
 
 interface NFTDetails {
   id: string;
@@ -124,8 +124,8 @@ export default function NFTDetailsPage() {
             <div className="flex justify-between items-center">
               <span className="text-gray-400">Price</span>
               <div className="flex items-center gap-2 text-2xl font-bold text-gray-100">
-                <FaEthereum className="text-blue-400" />
-                <span>{nft.price} ETH</span>
+                <MdToken className="text-blue-400" />
+                <span>{nft.price} DAT</span>
               </div>
             </div>
 
@@ -165,7 +165,7 @@ export default function NFTDetailsPage() {
               ? 'Connect Wallet to Purchase'
               : purchasing
               ? 'Processing...'
-              : `Buy for ${nft.price} ETH`}
+              : `Buy for ${nft.price} DAT`}
           </button>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { FaEthereum } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
+import { MdToken } from "react-icons/md";
 
 interface NFTCardProps {
   id: string;
@@ -40,8 +41,8 @@ export default function NFTCard({ id, name, image, price, tokenId, contractAddre
           <div className="flex items-center justify-between text-gray-400">
             <span>Price:</span>
             <div className="flex items-center gap-1 text-gray-200">
-              <FaEthereum className="text-blue-400" />
-              <span>{price} ETH</span>
+              <MdToken className="text-blue-400" />
+              <span>{price} DAT</span>
             </div>
           </div>
           

@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { ethers, formatUnits } from 'ethers';
 import AuctionManagerABI from '../abi/AuctionManager.json';
 import { getBlockTimestamp } from './utils';
 
@@ -20,6 +20,11 @@ interface AuctionStartedEvent {
     endTime: string;
   };
 }
+
+// 如果 DAT Token 使用不同的小数位数
+const formatDATAmount = (amount: bigint, decimals: number = 18) => {
+  return formatUnits(amount, decimals);
+};
 
 export async function getAuctionEvents(
   provider: ethers.Provider,
@@ -67,11 +72,11 @@ export async function getAuctionEvents(
             seller,
             nftContract,
             tokenId: tokenId.toString(),
-            startingPrice: startingPrice.toString(),
-            reservePrice: reservePrice.toString(),
-            minBidIncrement: minBidIncrement.toString(),
+            startingPrice: formatDATAmount(startingPrice),
+            reservePrice: formatDATAmount(reservePrice),
+            minBidIncrement: formatDATAmount(minBidIncrement),
             duration: duration.toString(),
-            initialBid: initialBid.toString(),
+            initialBid: formatDATAmount(initialBid),
             startTime: startTime.toString(),
             endTime: endTime.toString()
           };

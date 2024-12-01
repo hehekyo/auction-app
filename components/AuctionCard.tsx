@@ -161,10 +161,8 @@ export default function AuctionCard({
  
 
   return (
-    <div 
-      className="bg-gray-800 rounded-xl overflow-hidden cursor-pointer hover:shadow-lg transition-transform  hover:scale-105 hover:bg-gray-750"
-      onClick={onViewDetail}
-    >
+    <div className="bg-gray-800 rounded-xl overflow-hidden  hover:shadow-lg transition-transform  hover:scale-105 hover:bg-gray-750"
+>
       {/* NFT Image */}
       <div className="relative aspect-square">
         {nftMetadata?.image ? (
@@ -186,11 +184,7 @@ export default function AuctionCard({
       </div>
 
       {/* Auction Info */}
-      <div className="p-4">
-        <h3 className="text-lg font-semibold text-gray-100 mb-2">
-          {nftMetadata?.name || 'Loading...'}
-        </h3>
-        
+      <div className="p-4 space-y-4">
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-gray-400">Type</span>
@@ -227,6 +221,31 @@ export default function AuctionCard({
             </span>
           </div>
         </div>
+
+        {/* View Detail Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onViewDetail();
+          }}
+          className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg 
+            transition-colors duration-200 flex items-center justify-center space-x-2"
+        >
+          <span>View Details</span>
+          <svg 
+            className="w-4 h-4" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={2} 
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+        </button>
       </div>
     </div>
   );

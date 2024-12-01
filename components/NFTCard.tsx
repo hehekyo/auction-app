@@ -42,7 +42,7 @@ export default function NFTCard({ id, name, image, price, tokenId, contractAddre
             <span>Price:</span>
             <div className="flex items-center gap-1 text-gray-200">
               <MdToken className="text-blue-400" />
-              <span>{price} DAT</span>
+              <span>{100} DAT</span>
             </div>
           </div>
           

@@ -1,71 +1,16 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { ethers } from 'ethers';
+import { getNFTMintedEvents } from '@/events/nftEvents';
 
 interface NFT {
   id: string;
   name: string;
   image: string;
-  price: string;
   tokenId: string;
+  owner: string;
+  mintTime: number;
   contractAddress: string;
 }
-
-/**
-https://ipfs.io/ipfs/QmV6hWqJ1du519rrrk23G9XCmKuvRzvjaPUy2tLtfEwgse
-https://ipfs.io/ipfs/QmUwivpSjVnzDaMEUZ47tHhmZbeao3eZQFqt2nKf5QzyaH
-https://ipfs.io/ipfs/QmTM6pgQRbdJ7kfk1UYQDJE6g95Z2pc7g1Sb5rE1GY4JdN
-https://ipfs.io/ipfs/Qme7QUnG7mpZPY36tnZpTSc3cY5HN9qQF4X86rj6odazxb
-https://ipfs.io/ipfs/QmPQGcpySA3zNBBk26ZedjCLnsuTDJnzDemERM4n59HmQ1
- */
-const nftUrls = [
-    'QmV6hWqJ1du519rrrk23G9XCmKuvRzvjaPUy2tLtfEwgse',
-    'QmUwivpSjVnzDaMEUZ47tHhmZbeao3eZQFqt2nKf5QzyaH',
-    'QmTM6pgQRbdJ7kfk1UYQDJE6g95Z2pc7g1Sb5rE1GY4JdN',
-    'Qme7QUnG7mpZPY36tnZpTSc3cY5HN9qQF4X86rj6odazxb',
-    'QmPQGcpySA3zNBBk26ZedjCLnsuTDJnzDemERM4n59HmQ1'
-]
-
-const mockNFTs: NFT[] = [
-  {
-    id: '1',
-    name: 'Crypto Punk #1234',
-    image: `https://ipfs.io/ipfs/${nftUrls[0]}`,
-    price: '0.5',
-    tokenId: '1234',
-    contractAddress: '0x1234...5678'
-  },
-  {
-    id: '2',
-    name: 'Bored Ape #5678',
-    image: `https://ipfs.io/ipfs/${nftUrls[1]}`,
-    price: '1.2',
-    tokenId: '5678',
-    contractAddress: '0x8765...4321'
-  },
-  {
-    id: '3',
-    name: 'Doodle #9012',
-    image: `https://ipfs.io/ipfs/${nftUrls[2]}`,
-    price: '0.8',
-    tokenId: '9012',
-    contractAddress: '0x9012...3456'
-  },
-  {
-    id: '4',
-    name: 'Azuki #3456',
-    image: `https://ipfs.io/ipfs/${nftUrls[3]}`,
-    price: '2.5',
-    tokenId: '3456',
-    contractAddress: '0x3456...7890'
-  },
-  {
-    id: '4',
-    name: 'Azuki #3456',
-    image: `https://ipfs.io/ipfs/${nftUrls[4]}`,
-    price: '2.5',
-    tokenId: '3456',
-    contractAddress: '0x3456...7890'
-  }
-];
 
 export default async function handler(
   req: NextApiRequest,
@@ -73,13 +18,50 @@ export default async function handler(
 ) {
   if (req.method === 'GET') {
     try {
-      // 模拟API延迟
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // 返回模拟数据
-      res.status(200).json(mockNFTs);
+      // 初始化 provider
+      const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
+      const contractAddress = process.env.NFT_CONTRACT_ADDRESS;
+
+      if (!contractAddress) {
+        throw new Error('NFT contract address not configured');
+      }
+
+      // 获取最新区块
+      const latestBlock = await provider.getBlockNumber();
+      // 获取过去 10000 个区块的事件（可以根据需要调整）
+      const fromBlock = Math.max(0, latestBlock - 10000);
+
+      const result = await getNFTMintedEvents(
+        provider,
+        contractAddress,
+        fromBlock,
+        latestBlock
+      );
+
+      if (!result.success || !result.data) {
+        throw new Error(result.error || 'Failed to fetch NFT events');
+      }
+
+      // 转换事件数据为 NFT 格式
+      const nfts: NFT[] = result.data.map((event) => ({
+        id: event.args.tokenId,
+        name: `DA NFT #${event.args.tokenId}`,
+        image: event.args.imageURI.replace('ipfs://', 'https://ipfs.io/ipfs/'),
+        tokenId: event.args.tokenId,
+        owner: event.args.to,
+        mintTime: event.timestamp || 0,
+        contractAddress: contractAddress
+      }));
+
+      // 按铸造时间倒序排序
+      nfts.sort((a, b) => b.mintTime - a.mintTime);
+
+      res.status(200).json(nfts);
     } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch NFTs' });
+      console.error('Error fetching NFTs:', error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : 'Failed to fetch NFTs' 
+      });
     }
   } else {
     res.setHeader('Allow', ['GET']);

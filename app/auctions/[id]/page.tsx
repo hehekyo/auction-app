@@ -11,15 +11,9 @@ import { MdToken } from "react-icons/md";
 
 // 更新类型定义以匹配 API 返回的数据结构
 interface BidEvent {
-  transactionHash: string;
-  blockNumber: number;
-  timestamp: number | null;
-  args: {
-    auctionId: string;
-    bidder: string;
-    bidAmount: string;
-    bidTimestamp: string;
-  };
+  bidder: string;
+  amount: string;
+  timestamp: string;
 }
 
 interface AuctionDetails {
@@ -27,15 +21,16 @@ interface AuctionDetails {
   seller: string;
   nftContract: string;
   tokenId: string;
+  tokenURI: string;
+  auctionType: string;
   startingPrice: string;
   reservePrice: string;
-  minBidIncrement: string;
   duration: string;
+  depositAmount: string;
   startTime: string;
   endTime: string;
   highestBid: string;
   highestBidder: string;
-  status: string;
 }
 
 interface AuctionData {
@@ -176,14 +171,7 @@ export default function AuctionDetailsPage() {
                 </div>
               </div>
 
-              <div className="flex justify-between items-center">
-                <span className="text-gray-400">Min Bid Increment</span>
-                <div className="flex items-center gap-2 text-gray-200">
-                  <MdToken className="text-blue-400" />
-                  <span>{auctionDetails.minBidIncrement} DAT</span>
-                </div>
-              </div>
-
+              
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Highest Bidder</span>
                 <span className="text-gray-200">
@@ -191,15 +179,7 @@ export default function AuctionDetailsPage() {
                 </span>
               </div>
 
-              <div className="flex justify-between items-center">
-                <span className="text-gray-400">Status</span>
-                <span className={`text-gray-200 ${
-                  auctionDetails.status === 'active' ? 'text-green-400' : 'text-red-400'
-                }`}>
-                  {auctionDetails.status.toUpperCase()}
-                </span>
-              </div>
-
+            
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">End Time</span>
                 <span className="text-gray-200">
@@ -210,6 +190,21 @@ export default function AuctionDetailsPage() {
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Seller</span>
                 <span className="text-gray-200">{auctionDetails.seller}</span>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400">Deposit Required</span>
+                <div className="flex items-center gap-2 text-gray-200">
+                  <MdToken className="text-blue-400" />
+                  <span>{auctionDetails.depositAmount} DAT</span>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400">Auction Type</span>
+                <span className="text-gray-200">
+                  {auctionDetails.auctionType === '0' ? 'English Auction' : 'Dutch Auction'}
+                </span>
               </div>
             </div>
 
@@ -227,12 +222,12 @@ export default function AuctionDetailsPage() {
                   </thead>
                   <tbody>
                     {bidHistory.length > 0 ? (
-                      bidHistory.map((bid) => (
-                        <tr key={bid.transactionHash} className="border-t border-gray-700">
-                          <td className="py-3">{bid.args.bidder}</td>
-                          <td className="py-3">{bid.args.bidAmount} DAT</td>
+                      bidHistory.map((bid, index) => (
+                        <tr key={index} className="border-t border-gray-700">
+                          <td className="py-3">{bid.bidder}</td>
+                          <td className="py-3">{bid.amount} DAT</td>
                           <td className="py-3">
-                            {new Date(Number(bid.args.bidTimestamp) * 1000).toLocaleString()}
+                            {new Date(Number(bid.timestamp) * 1000).toLocaleString()}
                           </td>
                         </tr>
                       ))

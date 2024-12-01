@@ -10,7 +10,27 @@ interface BidPlacedEvent {
     auctionId: string;
     bidder: string;
     bidAmount: string;
-    bidTimestamp: string;
+    timestamp: string;
+  };
+}
+
+interface AuctionStartedEvent {
+  transactionHash: string;
+  blockNumber: number;
+  timestamp: number | null;
+  args: {
+    auctionId: string;
+    seller: string;
+    nftContract: string;
+    tokenId: string;
+    tokenURI: string;
+    auctionType: string;
+    startingPrice: string;
+    reservePrice: string;
+    duration: string;
+    depositAmount: string;
+    startTime: string;
+    endTime: string;
   };
 }
 
@@ -47,31 +67,56 @@ export async function getAuctionDetailsAndBids(
   try {
     const contract = new ethers.Contract(contractAddress, AuctionManagerABI.abi, provider);
     
-    // 获取拍卖详情
-    const auction = await contract.getAuction(auctionId);
+    // 获取拍卖开始事件
+    const auctionFilter = contract.filters.AuctionStarted(auctionId);
+    const auctionEvents = await contract.queryFilter(auctionFilter);
     
-    // 解构拍卖数据，确保只对需要格式化的数值使用 formatUnits
+    if (auctionEvents.length === 0) {
+      throw new Error('Auction not found');
+    }
+
+    const auctionEvent = auctionEvents[0];
     const {
       seller,
       nftContract,
       tokenId,
-      tokenURI,          // 这是字符串，不需要格式化
-      auctionType,       // 这是数字，但不需要格式化
-      startingPrice,     // 需要格式化
-      reservePrice,      // 需要格式化
-      duration,          // 这是数字，不需要格式化
-      depositAmount,     // 需要格式化
-      startTime,         // 这是时间戳，不需要格式化
-      endTime,          // 这是时间戳，不需要格式化
-      highestBid,       // 需要格式化
-      highestBidder
-    } = auction;
+      tokenURI,
+      auctionType,
+      startingPrice,
+      reservePrice,
+      duration,
+      depositAmount,
+      startTime,
+      endTime
+    } = auctionEvent.args;
+
+    // 获取出价历史
+    const bidFilter = contract.filters.BidPlaced(auctionId);
+    const bidEvents = await contract.queryFilter(bidFilter);
+
+    // 获取最高出价信息
+    const bids = await Promise.all(
+      bidEvents.map(async (event) => {
+        const { bidder, bidAmount, timestamp } = event.args;
+        return {
+          bidder,
+          amount: ethers.formatUnits(bidAmount, 18),
+          timestamp: timestamp.toString()
+        };
+      })
+    );
+
+    // 根据出价金额排序，获取最高出价
+    const sortedBids = [...bids].sort((a, b) => 
+      parseFloat(b.amount) - parseFloat(a.amount)
+    );
+    const highestBid = sortedBids[0] || { amount: '0', bidder: ethers.ZeroAddress };
 
     const formattedAuction = {
       seller,
       nftContract,
       tokenId: tokenId.toString(),
-      tokenURI,          // 直接使用字符串
+      tokenURI,
       auctionType: auctionType.toString(),
       startingPrice: ethers.formatUnits(startingPrice, 18),
       reservePrice: ethers.formatUnits(reservePrice, 18),
@@ -79,24 +124,9 @@ export async function getAuctionDetailsAndBids(
       depositAmount: ethers.formatUnits(depositAmount, 18),
       startTime: startTime.toString(),
       endTime: endTime.toString(),
-      highestBid: ethers.formatUnits(highestBid, 18),
-      highestBidder
+      highestBid: highestBid.amount,
+      highestBidder: highestBid.bidder
     };
-
-    // 获取出价历史
-    const bidFilter = contract.filters.BidPlaced(auctionId);
-    const bidEvents = await contract.queryFilter(bidFilter);
-
-    const bids = await Promise.all(
-      bidEvents.map(async (event) => {
-        const [, bidder, amount] = event.args!;
-        return {
-          bidder,
-          amount: ethers.formatUnits(amount, 18),
-          timestamp: (await event.getBlock()).timestamp
-        };
-      })
-    );
 
     return {
       success: true,

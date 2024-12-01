@@ -1,6 +1,7 @@
 import { ethers, formatUnits } from 'ethers';
 import AuctionManagerABI from '../abi/AuctionManager.json';
 import { getBlockTimestamp } from './utils';
+import ERC721ABI from '../abi/DANFT.json';
 
 interface AuctionStartedEvent {
   transactionHash: string;
@@ -11,11 +12,12 @@ interface AuctionStartedEvent {
     seller: string;
     nftContract: string;
     tokenId: string;
+    tokenURI: string;
+    auctionType: string;
     startingPrice: string;
     reservePrice: string;
-    minBidIncrement: string;
     duration: string;
-    initialBid: string;
+    depositAmount: string;
     startTime: string;
     endTime: string;
   };
@@ -43,7 +45,7 @@ export async function getAuctionEvents(
     const filter = contract.filters[eventName](...Object.values(filters));
     const events = await contract.queryFilter(filter, fromBlock, toBlock);
     
-    const formattedEvents = events.map(event => {
+    const formattedEvents = events.map(async (event) => {
       const result = {
         transactionHash: event.transactionHash,
         blockNumber: event.blockNumber,
@@ -58,11 +60,12 @@ export async function getAuctionEvents(
             seller,
             nftContract,
             tokenId,
+            tokenURI,
+            auctionType,
             startingPrice,
             reservePrice,
-            minBidIncrement,
             duration,
-            initialBid,
+            depositAmount,
             startTime,
             endTime
           ] = event.args;
@@ -72,11 +75,12 @@ export async function getAuctionEvents(
             seller,
             nftContract,
             tokenId: tokenId.toString(),
+            tokenURI,
+            auctionType: auctionType.toString(),
             startingPrice: formatDATAmount(startingPrice),
             reservePrice: formatDATAmount(reservePrice),
-            minBidIncrement: formatDATAmount(minBidIncrement),
             duration: duration.toString(),
-            initialBid: formatDATAmount(initialBid),
+            depositAmount: formatDATAmount(depositAmount),
             startTime: startTime.toString(),
             endTime: endTime.toString()
           };
@@ -86,18 +90,21 @@ export async function getAuctionEvents(
       return result;
     });
 
+    // 等待所有事件处理完成
+    const processedEvents = await Promise.all(formattedEvents);
+
     // 获取时间戳
     const timestamps = await Promise.all(
-      formattedEvents.map(event => getBlockTimestamp(provider, event.blockNumber))
+      processedEvents.map(event => getBlockTimestamp(provider, event.blockNumber))
     );
 
-    formattedEvents.forEach((event, index) => {
+    processedEvents.forEach((event, index) => {
       event.timestamp = timestamps[index];
     });
 
     return {
       success: true,
-      data: formattedEvents
+      data: processedEvents
     };
 
   } catch (error: any) {

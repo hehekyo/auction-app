@@ -125,7 +125,7 @@ export default function AuctionsPage() {
         onClose={() => {
           setIsCreateModalOpen(false);
           // 可选：刷新拍卖列表
-          fetchAuctions();
+        //   fetchAuctions();
         }}
       />
     </div>

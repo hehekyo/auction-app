@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { FaEthereum } from 'react-icons/fa';
 import CreateBidModal from '@/components/CreateBidModal';
 import { ethers } from 'ethers';
+import { MdToken } from "react-icons/md";
+
 // import ERC721ABI from '@/abi/ERC721.json';
 
 // 更新类型定义以匹配 API 返回的数据结构
@@ -52,7 +53,7 @@ export default function AuctionDetailsPage() {
 
   const fetchNftMetadata = async (contractAddress: string, tokenId: string) => {
     try {
-      const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
+      const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
     //   const nftContract = new ethers.Contract(contractAddress, ERC721ABI, provider);
     //   const tokenURI = await nftContract.tokenURI(tokenId);
     //   const url = tokenURI.replace('ipfs://', 'https://ipfs.io/ipfs/');
@@ -162,24 +163,24 @@ export default function AuctionDetailsPage() {
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Current Bid</span>
                 <div className="flex items-center gap-2 text-2xl font-bold text-gray-100">
-                  <FaEthereum className="text-blue-400" />
-                  <span>{auctionDetails.highestBid} ETH</span>
+                  <MdToken className="text-blue-400" />
+                  <span>{auctionDetails.highestBid} DAT</span>
                 </div>
               </div>
 
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Reserve Price</span>
                 <div className="flex items-center gap-2 text-gray-200">
-                  <FaEthereum className="text-blue-400" />
-                  <span>{auctionDetails.reservePrice} ETH</span>
+                  <MdToken className="text-blue-400" />
+                  <span>{auctionDetails.reservePrice} DAT</span>
                 </div>
               </div>
 
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Min Bid Increment</span>
                 <div className="flex items-center gap-2 text-gray-200">
-                  <FaEthereum className="text-blue-400" />
-                  <span>{auctionDetails.minBidIncrement} ETH</span>
+                  <MdToken className="text-blue-400" />
+                  <span>{auctionDetails.minBidIncrement} DAT</span>
                 </div>
               </div>
 
@@ -229,7 +230,7 @@ export default function AuctionDetailsPage() {
                       bidHistory.map((bid) => (
                         <tr key={bid.transactionHash} className="border-t border-gray-700">
                           <td className="py-3">{bid.args.bidder}</td>
-                          <td className="py-3">{bid.args.bidAmount} ETH</td>
+                          <td className="py-3">{bid.args.bidAmount} DAT</td>
                           <td className="py-3">
                             {new Date(Number(bid.args.bidTimestamp) * 1000).toLocaleString()}
                           </td>

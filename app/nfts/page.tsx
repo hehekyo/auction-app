@@ -64,7 +64,7 @@ export default function NFTsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 text-gray-100">NFT Collection</h1>
+      <h1 className="text-3xl font-bold mb-8 text-gray-500">NFT Marketplace</h1>
       
       {nfts.length === 0 ? (
         <div className="text-center text-gray-400 py-12">

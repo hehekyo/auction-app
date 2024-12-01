@@ -162,7 +162,7 @@ export default function AuctionCard({
 
   return (
     <div 
-      className="bg-gray-800 rounded-xl overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02] hover:bg-gray-750"
+      className="bg-gray-800 rounded-xl overflow-hidden cursor-pointer hover:shadow-lg transition-transform  hover:scale-105 hover:bg-gray-750"
       onClick={onViewDetail}
     >
       {/* NFT Image */}

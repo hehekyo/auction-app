@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { FaEthereum, FaArrowRight, FaGavel } from 'react-icons/fa';
+import { MdToken } from "react-icons/md";
 
 interface NFT {
   id: string;
@@ -208,9 +209,9 @@ export default function Home() {
                         {latestNFTs[currentNFT]?.name}
                       </h3>
                       <div className="flex items-center gap-2">
-                        <FaEthereum className="text-blue-400" />
+                        <MdToken className="text-blue-400" />
                         <span className="text-white">
-                          {latestNFTs[currentNFT]?.price} ETH
+                          {latestNFTs[currentNFT]?.price} DAT
                         </span>
                       </div>
                     </div>

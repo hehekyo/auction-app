@@ -80,10 +80,7 @@ export default function AuctionsPage() {
       {/* Header with Create Button */}
       <div className="mb-8 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-100">Live Auctions</h1>
-          <p className="text-gray-400 mt-2">
-            Discover and bid on unique NFTs from our community
-          </p>
+          <h1 className="text-3xl font-bold text-gray-500"> NFT Auctions</h1>
         </div>
         
         <button

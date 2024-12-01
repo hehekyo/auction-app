@@ -7,9 +7,6 @@ import CreateBidModal from '@/components/CreateBidModal';
 import { ethers } from 'ethers';
 import { MdToken } from "react-icons/md";
 
-// import ERC721ABI from '@/abi/ERC721.json';
-
-// 更新类型定义以匹配 API 返回的数据结构
 interface BidEvent {
   bidder: string;
   amount: string;
@@ -17,7 +14,6 @@ interface BidEvent {
 }
 
 interface AuctionDetails {
-  auctionId: string;
   seller: string;
   nftContract: string;
   tokenId: string;
@@ -46,22 +42,6 @@ export default function AuctionDetailsPage() {
   const [isBidModalOpen, setIsBidModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const fetchNftMetadata = async (contractAddress: string, tokenId: string) => {
-    try {
-      const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
-    //   const nftContract = new ethers.Contract(contractAddress, ERC721ABI, provider);
-    //   const tokenURI = await nftContract.tokenURI(tokenId);
-    //   const url = tokenURI.replace('ipfs://', 'https://ipfs.io/ipfs/');
-    //   const response = await fetch(url);
-    //   const metadata = await response.json();
-    //   const imageUrl = metadata.image.replace('ipfs://', 'https://ipfs.io/ipfs/');
-    const imageUrl = "/nfts/1.jpg";
-      setNftImageUrl(imageUrl);
-    } catch (error) {
-      console.error('Error fetching NFT metadata:', error);
-    }
-  };
-
   useEffect(() => {
     if (params.id) {
       fetchAuctionData();
@@ -70,10 +50,8 @@ export default function AuctionDetailsPage() {
 
   useEffect(() => {
     if (auctionData?.auctionDetails) {
-      fetchNftMetadata(
-        auctionData.auctionDetails.nftContract,
-        auctionData.auctionDetails.tokenId
-      );
+      const imageUrl = auctionData.auctionDetails.tokenURI.replace('ipfs://', 'https://ipfs.io/ipfs/');
+      setNftImageUrl(imageUrl);
     }
   }, [auctionData]);
 

@@ -4,69 +4,33 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import CreateBidModal from '@/components/CreateBidModal';
-import { ethers } from 'ethers';
 import { MdToken } from "react-icons/md";
-
-interface BidEvent {
-  bidder: string;
-  amount: string;
-  timestamp: string;
-}
-
-interface AuctionDetails {
-  seller: string;
-  nftContract: string;
-  tokenId: string;
-  tokenURI: string;
-  auctionType: string;
-  startingPrice: string;
-  reservePrice: string;
-  duration: string;
-  depositAmount: string;
-  startTime: string;
-  endTime: string;
-  highestBid: string;
-  highestBidder: string;
-}
-
-interface AuctionData {
-  auctionDetails: AuctionDetails;
-  bidHistory: BidEvent[];
-}
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { fetchAuctionDetails, clearCurrentAuction } from '@/store/auctionSlice';
 
 export default function AuctionDetailsPage() {
   const params = useParams();
   const router = useRouter();
-  const [auctionData, setAuctionData] = useState<AuctionData | null>(null);
+  const dispatch = useAppDispatch();
+  const { currentAuction, loading, error } = useAppSelector((state) => state.auctions);
   const [nftImageUrl, setNftImageUrl] = useState<string>('');
   const [isBidModalOpen, setIsBidModalOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (params.id) {
-      fetchAuctionData();
+      dispatch(fetchAuctionDetails(params.id as string));
     }
-  }, [params.id]);
+    return () => {
+      dispatch(clearCurrentAuction());
+    };
+  }, [dispatch, params.id]);
 
   useEffect(() => {
-    if (auctionData?.auctionDetails) {
-      const imageUrl = auctionData.auctionDetails.tokenURI.replace('ipfs://', 'https://ipfs.io/ipfs/');
+    if (currentAuction?.auctionDetails) {
+      const imageUrl = currentAuction.auctionDetails.tokenURI.replace('ipfs://', 'https://ipfs.io/ipfs/');
       setNftImageUrl(imageUrl);
     }
-  }, [auctionData]);
-
-  const fetchAuctionData = async () => {
-    try {
-      const response = await fetch(`/api/auctions/${params.id}`);
-      if (!response.ok) throw new Error('Failed to fetch auction data');
-      const data = await response.json();
-      setAuctionData(data);
-    } catch (error) {
-      console.error("Failed to fetch auction data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [currentAuction]);
 
   const renderContent = () => {
     if (loading) {
@@ -77,11 +41,11 @@ export default function AuctionDetailsPage() {
       );
     }
 
-    if (!auctionData) {
+    if (error || !currentAuction) {
       return (
         <div className="flex justify-center items-center min-h-screen">
           <div className="text-center text-gray-400">
-            <p>Auction not found</p>
+            <p>{error || 'Auction not found'}</p>
             <button
               onClick={() => router.push('/auctions')}
               className="mt-4 text-blue-500 hover:text-blue-400"
@@ -93,7 +57,7 @@ export default function AuctionDetailsPage() {
       );
     }
 
-    const { auctionDetails, bidHistory } = auctionData;
+    const { auctionDetails, bidHistory } = currentAuction;
 
     return (
       <div className="container mx-auto px-4 py-8">
@@ -149,7 +113,6 @@ export default function AuctionDetailsPage() {
                 </div>
               </div>
 
-              
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Highest Bidder</span>
                 <span className="text-gray-200">
@@ -157,7 +120,6 @@ export default function AuctionDetailsPage() {
                 </span>
               </div>
 
-            
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">End Time</span>
                 <span className="text-gray-200">
@@ -212,7 +174,7 @@ export default function AuctionDetailsPage() {
                     ) : (
                       <tr>
                         <td colSpan={3} className="text-center py-4 text-gray-400">
-                          No bids yet
+                          No bid history yet
                         </td>
                       </tr>
                     )}
@@ -221,14 +183,12 @@ export default function AuctionDetailsPage() {
               </div>
             </div>
 
-            {auctionDetails.status === 'active' && (
-              <button
-                onClick={() => setIsBidModalOpen(true)}
-                className="w-full py-4 rounded-xl text-lg font-bold bg-blue-600 hover:bg-blue-700 text-white transition-colors"
-              >
-                Place Bid
-              </button>
-            )}
+            <button
+              onClick={() => setIsBidModalOpen(true)}
+              className="w-full py-4 rounded-xl text-lg font-bold bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+            >
+              Place Bid
+            </button>
           </div>
         </div>
 
@@ -237,7 +197,7 @@ export default function AuctionDetailsPage() {
           isOpen={isBidModalOpen}
           onClose={() => {
             setIsBidModalOpen(false);
-            fetchAuctionData();
+            dispatch(fetchAuctionDetails(params.id as string));
           }}
           auctionId={auctionDetails.auctionId}
           minBid={Number(auctionDetails.startingPrice)}

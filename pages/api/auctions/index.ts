@@ -73,8 +73,12 @@ console.log("============latestBlock=============",latestBlock);
 
 
 console.log("============chain auctions=============",auctions);
+const auctionsData = auctions.data?.map((auction) => {
+  return auction.args
+});
 
-res.status(200).json(auctions);
+console.log("============chain auctionsData=============",auctionsData);
+res.status(200).json(auctionsData);
 
 
 

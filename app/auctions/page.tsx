@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AuctionCard from '@/components/AuctionCard';
-import CreateAuctionModal from '@/components/CreateAuctionModal';
 import { FaPlus } from 'react-icons/fa';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchAuctions } from '@/store/auctionSlice';
@@ -12,7 +11,6 @@ export default function AuctionsPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { auctions, loading, error } = useAppSelector((state) => state.auctions);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   useEffect(() => {
     dispatch(fetchAuctions());
@@ -24,14 +22,14 @@ export default function AuctionsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Header with Create Button - Always visible */}
+      {/* Header with Create Button */}
       <div className="mb-8 flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-500">NFT Auctions</h1>
         </div>
         
         <button
-          onClick={() => setIsCreateModalOpen(true)}
+          onClick={() => router.push('/auctions/create')}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg 
             hover:bg-blue-700 transition-colors"
         >
@@ -74,15 +72,6 @@ export default function AuctionsPage() {
           ))}
         </div>
       )}
-
-      {/* Create Auction Modal */}
-      <CreateAuctionModal
-        isOpen={isCreateModalOpen}
-        onClose={() => {
-          setIsCreateModalOpen(false);
-          dispatch(fetchAuctions());
-        }}
-      />
     </div>
   );
 } 

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import NFTCard from '@/components/NFTCard';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchNFTs } from '@/store/nftSlice';
+import { log } from 'console';
 
 export default function NFTsPage() {
   const router = useRouter();
@@ -18,7 +19,7 @@ export default function NFTsPage() {
   const handleViewDetail = (nftId: string) => {
     router.push(`/nfts/${nftId}`);
   };
-
+  console.log("============nfts=============",nfts);
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">

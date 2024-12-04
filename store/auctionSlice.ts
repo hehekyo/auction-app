@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { AuctionService } from '@/services/auctionService';
 
 export interface Auction {
     auctionId: string;
@@ -45,34 +46,26 @@ const initialState: AuctionState = {
   error: null,
 };
 
-// 从 API 获取拍卖列表
+const auctionService = AuctionService.getInstance();
+
 export const fetchAuctions = createAsyncThunk(
   'auctions/fetchAuctions',
   async () => {
     try {
-      const response = await fetch('/api/auctions');
-      if (!response.ok) {
-        throw new Error('Failed to fetch auctions');
-      }
-      const data = await response.json();
-      return data;
+      const auctions = await auctionService.getAuctions();
+      return auctions;
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : 'Failed to fetch auctions');
     }
   }
 );
 
-// 从 API 获取拍卖详情
 export const fetchAuctionDetails = createAsyncThunk(
   'auctions/fetchAuctionDetails',
   async (auctionId: string) => {
     try {
-      const response = await fetch(`/api/auctions/${auctionId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch auction details');
-      }
-      const data = await response.json();
-      return data;
+      const details = await auctionService.getAuctionDetails(auctionId);
+      return details;
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : 'Failed to fetch auction details');
     }

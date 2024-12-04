@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { NFTService } from '@/services/nftService';
 
 export interface NFT {
   id: string;
@@ -29,16 +30,15 @@ const initialState: NFTState = {
   error: null,
 };
 
+const nftService = NFTService.getInstance();
+
 export const fetchNFTs = createAsyncThunk(
   'nfts/fetchNFTs',
   async () => {
     try {
-      const response = await fetch('/api/nfts');
-      if (!response.ok) {
-        throw new Error('Failed to fetch NFTs');
-      }
-      const data = await response.json();
-      return data;
+      const nfts = await nftService.getNFTs();
+      console.log("============redux nfts=============",nfts);
+      return nfts;
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : 'Failed to fetch NFTs');
     }
@@ -49,12 +49,8 @@ export const fetchNFTDetails = createAsyncThunk(
   'nfts/fetchNFTDetails',
   async (nftId: string) => {
     try {
-      const response = await fetch(`/api/nfts/${nftId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch NFT details');
-      }
-      const data = await response.json();
-      return data;
+      const details = await nftService.getNFTDetails(nftId);
+      return details;
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : 'Failed to fetch NFT details');
     }

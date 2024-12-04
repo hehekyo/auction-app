@@ -4,19 +4,22 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { MdArrowBack } from 'react-icons/md';
 import Image from 'next/image';
-import { ContractService } from '@/services/contractService';
+import { AuctionService } from '@/services/auctionService';
+import { ethers } from 'ethers';
 
 interface NFTInfo {
   tokenURI: string;
   exists: boolean;
+  image: string;
+  name: string;
 }
 
 export default function CreateAuctionPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [auctionType, setAuctionType] = useState<'0' | '1'>('0');
-  const [startingPrice, setStartingPrice] = useState(0.5);
-  const [reservePrice, setReservePrice] = useState(0.5);
+  const [startingPrice, setStartingPrice] = useState(200);
+  const [reservePrice, setReservePrice] = useState(180);
   const [duration, setDuration] = useState(120);
   const [nftContract, setNftContract] = useState('');
   const [tokenId, setTokenId] = useState('');
@@ -24,62 +27,57 @@ export default function CreateAuctionPage() {
   const [decrementInterval, setDecrementInterval] = useState(0);
   const [nftInfo, setNftInfo] = useState<NFTInfo | null>(null);
   const [nftError, setNftError] = useState<string | null>(null);
-  const [nftImageUrl, setNftImageUrl] = useState<string | null>(null);
+  const [isApproving, setIsApproving] = useState(false);
+  const [isApproved, setIsApproved] = useState(false);
 
-  // 验证并加载 NFT 信息
-  const validateAndLoadNFT = async () => {
-    if (!nftContract || !tokenId) return;
+  // 验证并授权 NFT
+  const handleApproveNFT = async () => {
+    if (!nftContract || !tokenId) {
+      setNftError('Please enter NFT contract address and token ID');
+      return;
+    }
 
+    setIsApproving(true);
+    setNftError(null);
     try {
-      setNftError(null);
-      setNftInfo(null);
-      setNftImageUrl(null);
-
-      // 验证合约地址格式
-      if (!/^0x[a-fA-F0-9]{40}$/.test(nftContract)) {
-        setNftError('Invalid contract address format');
-        return;
-      }
-
-      const contractService = ContractService.getInstance();
-      const exists = await contractService.checkNFTExists(nftContract, tokenId);
+      const auctionService = AuctionService.getInstance();
+      const metadata = await auctionService.approveNFT(nftContract, Number(tokenId));
       
-      if (!exists) {
-        setNftError('NFT does not exist');
-        return;
-      }
-
-      const tokenURI = await contractService.getNFTTokenURI(nftContract, tokenId);
-      setNftInfo({ tokenURI, exists: true });
-
-      // 处理 IPFS URI
-      const imageUrl = tokenURI.replace('ipfs://', 'https://ipfs.io/ipfs/');
-      setNftImageUrl(imageUrl);
+      setNftInfo({
+        tokenURI: metadata.tokenURI,
+        exists: true,
+        image: metadata.image,
+        name: metadata.name
+      });
+      setIsApproved(true);
     } catch (error) {
-      console.error('Error validating NFT:', error);
-      setNftError(error instanceof Error ? error.message : 'Failed to validate NFT');
+      console.error('NFT approval failed:', error);
+      setNftError(error instanceof Error ? error.message : 'Failed to approve NFT');
+      setIsApproved(false);
+    } finally {
+      setIsApproving(false);
     }
   };
 
-  useEffect(() => {
-    if (nftContract && tokenId) {
-      validateAndLoadNFT();
-    }
-  }, [nftContract, tokenId]);
+//   useEffect(() => {
+//     if (nftContract && tokenId) {
+//       handleApproveNFT();
+//     }
+//   }, [nftContract, tokenId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nftInfo?.exists) {
-      setNftError('Please select a valid NFT');
+    if (!isApproved) {
+      setNftError('Please approve NFT first');
       return;
     }
 
     setLoading(true);
     try {
-      const contractService = ContractService.getInstance();
-      const durationInSeconds = Math.floor(duration * 3600);
+      const auctionService = AuctionService.getInstance();
+      const durationInSeconds = Math.floor(duration * 3600); // 转换小时为秒
       
-      const txHash = await contractService.createAuction(
+      const txHash = await auctionService.createAuction(
         Number(auctionType),
         startingPrice,
         reservePrice,
@@ -168,7 +166,10 @@ export default function CreateAuctionPage() {
                   <input 
                     type="text"
                     value={nftContract}
-                    onChange={(e) => setNftContract(e.target.value)}
+                    onChange={(e) => {
+                      setNftContract(e.target.value);
+                      setIsApproved(false);
+                    }}
                     className="w-full bg-gray-700 text-gray-100 rounded-lg p-2 text-sm border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     placeholder="0x..."
                     required
@@ -180,11 +181,24 @@ export default function CreateAuctionPage() {
                   <input 
                     type="text"
                     value={tokenId}
-                    onChange={(e) => setTokenId(e.target.value)}
+                    onChange={(e) => {
+                      setTokenId(e.target.value);
+                      setIsApproved(false);
+                    }}
                     className="w-full bg-gray-700 text-gray-100 rounded-lg p-2 text-sm border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     required
                   />
                 </div>
+
+                <button
+                  type="button"
+                  onClick={handleApproveNFT}
+                  disabled={isApproving || !nftContract || !tokenId}
+                  className="w-full py-2 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-500 
+                    text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isApproving ? 'Approving...' : isApproved ? 'Approved ✓' : 'Approve NFT'}
+                </button>
 
                 {nftError && (
                   <div className="text-red-500 text-xs bg-red-500/10 p-2 rounded-lg">
@@ -194,16 +208,16 @@ export default function CreateAuctionPage() {
               </div>
 
               <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-700">
-                {nftImageUrl ? (
+                {nftInfo?.image ? (
                   <Image
-                    src={nftImageUrl}
-                    alt="NFT Preview"
+                    src={nftInfo.image}
+                    alt={nftInfo.name || 'NFT Preview'}
                     fill
                     className="object-contain"
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">
-                    NFT Preview
+                    {isApproving ? 'Loading...' : 'NFT Preview'}
                   </div>
                 )}
               </div>
@@ -285,7 +299,7 @@ export default function CreateAuctionPage() {
 
           <button
             type="submit"
-            disabled={loading || !nftInfo?.exists}
+            disabled={loading || !isApproved}
             className="w-full py-3 rounded-xl text-base font-bold bg-gradient-to-r from-blue-600 to-blue-500 
               hover:from-blue-500 hover:to-blue-400 text-white transition-all disabled:opacity-50 
               disabled:cursor-not-allowed shadow-lg hover:shadow-xl"

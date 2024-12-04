@@ -16,7 +16,6 @@ export class BlockchainService {
   public async getProvider(): Promise<ethers.Provider> {
     if (!this.provider) {
       const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
-      console.log("============rpcUrl=============",rpcUrl);
       if (!rpcUrl) {
         throw new Error('RPC URL not configured');
       }

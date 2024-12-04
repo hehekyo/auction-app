@@ -61,7 +61,6 @@ const auctions = await getAuctionStartedEvents(
   latestBlock // toBlock
 );
 
-console.log("============latestBlock=============",latestBlock);
 
 
 // const auctions = await getAuctionStartedEvents(
@@ -72,12 +71,10 @@ console.log("============latestBlock=============",latestBlock);
 // );
 
 
-console.log("============chain auctions=============",auctions);
 const auctionsData = auctions.data?.map((auction) => {
   return auction.args
 });
 
-console.log("============chain auctionsData=============",auctionsData);
 res.status(200).json(auctionsData);
 
 

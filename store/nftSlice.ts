@@ -37,7 +37,6 @@ export const fetchNFTs = createAsyncThunk(
   async () => {
     try {
       const nfts = await nftService.getNFTs();
-      console.log("============redux nfts=============",nfts);
       return nfts;
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : 'Failed to fetch NFTs');

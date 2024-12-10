@@ -21,8 +21,8 @@ export default function CreateAuctionPage() {
   const [startingPrice, setStartingPrice] = useState(200);
   const [reservePrice, setReservePrice] = useState(180);
   const [duration, setDuration] = useState(120);
-  const [nftContract, setNftContract] = useState('');
-  const [tokenId, setTokenId] = useState('');
+  const [nftContract, setNftContract] = useState('0x4A679253410272dd5232B3Ff7cF5dbB88f295319');
+  const [tokenId, setTokenId] = useState('3');
   const [priceDecrement, setPriceDecrement] = useState(0);
   const [decrementInterval, setDecrementInterval] = useState(0);
   const [nftInfo, setNftInfo] = useState<NFTInfo | null>(null);
@@ -33,15 +33,18 @@ export default function CreateAuctionPage() {
   // 验证并授权 NFT
   const handleApproveNFT = async () => {
     if (!nftContract || !tokenId) {
-      setNftError('Please enter NFT contract address and token ID');
+      setNftError('请输入 NFT 合约地址和代币 ID');
       return;
     }
+    console.log("=======handleApproveNFT start");
+
 
     setIsApproving(true);
     setNftError(null);
     try {
       const auctionService = AuctionService.getInstance();
       const metadata = await auctionService.approveNFT(nftContract, Number(tokenId));
+      console.log("=======auctionService.approveNFT");
       
       setNftInfo({
         tokenURI: metadata.tokenURI,
@@ -50,9 +53,24 @@ export default function CreateAuctionPage() {
         name: metadata.name
       });
       setIsApproved(true);
-    } catch (error) {
-      console.error('NFT approval failed:', error);
-      setNftError(error instanceof Error ? error.message : 'Failed to approve NFT');
+    } catch (error: any) {
+      console.error('NFT 授权失败:', error);
+      if (error.message.includes('Chain "Hardhat" does not support contract')) {
+        setNftError('当前网络不支持 ENS 解析。请确保使用完整的合约地址，而不是 ENS 域名。');
+      } else if (error.message.includes('添加网络失败')) {
+        setNftError('请手动在 MetaMask 中添加 Hardhat 网络后重试。网络配置：\n' +
+          '网络名称: Hardhat\n' +
+          'RPC URL: http://localhost:8545\n' +
+          '链 ID: 31337');
+      } else if (error.message.includes('用户拒绝了授权请求')) {
+        setNftError('您取消了授权操作，请重试');
+      } else if (error.message.includes('钱包余额不足')) {
+        setNftError('钱包余额不足以支付 Gas 费用');
+      } else if (error.message.includes('你不是此 NFT 的所有者')) {
+        setNftError('您不是此 NFT 的所有者，无法授权');
+      } else {
+        setNftError(error.message || 'NFT 授权失败');
+      }
       setIsApproved(false);
     } finally {
       setIsApproving(false);
@@ -76,6 +94,8 @@ export default function CreateAuctionPage() {
     try {
       const auctionService = AuctionService.getInstance();
       const durationInSeconds = Math.floor(duration * 3600); // 转换小时为秒
+      
+      console.log("===starting createAuction");
       
       const txHash = await auctionService.createAuction(
         Number(auctionType),

@@ -16,6 +16,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           ended: false,
         }
       });
+      console.log("=======create newAuction",newAuction);
+      
       res.status(201).json(newAuction);
     } catch (error) {
       console.error('Failed to create auction:', error);

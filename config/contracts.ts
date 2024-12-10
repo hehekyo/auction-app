@@ -48,7 +48,7 @@ export const getCurrentConfig = (env: 'hardhat' | 'testnet' = 'hardhat'): Config
 
   return {
     network: {
-      chainId: env === 'hardhat' ? 31337 : 5,
+      chainId: env === 'hardhat' ? 1337 : 5,
       rpcUrl: env === 'hardhat' 
         ? 'http://127.0.0.1:8545'
         : process.env.TESTNET_RPC_URL || ''

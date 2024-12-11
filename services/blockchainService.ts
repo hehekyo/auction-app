@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { ethers } from "ethers";
 
 export class BlockchainService {
   private static instance: BlockchainService;
@@ -17,19 +17,17 @@ export class BlockchainService {
     if (!this.provider) {
       const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
       if (!rpcUrl) {
-        throw new Error('RPC URL not configured');
+        throw new Error("RPC URL not configured");
       }
-      
+
       const network = {
-        chainId: 1337,
-        name: 'hardhat',
+        chainId: 31337,
+        name: "hardhat",
         ensAddress: undefined,
-        getNetwork: async () => network
+        getNetwork: async () => network,
       };
 
-      this.provider = new ethers.JsonRpcProvider(
-        rpcUrl
-      );
+      this.provider = new ethers.JsonRpcProvider(rpcUrl);
     }
     return this.provider;
   }
@@ -40,8 +38,8 @@ export class BlockchainService {
       const block = await provider.getBlock(blockNumber);
       return block?.timestamp || null;
     } catch (error) {
-      console.error('Error fetching block timestamp:', error);
+      console.error("Error fetching block timestamp:", error);
       return null;
     }
   }
-} 
+}

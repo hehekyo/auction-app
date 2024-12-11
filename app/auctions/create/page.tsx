@@ -33,11 +33,10 @@ export default function CreateAuctionPage() {
   // 验证并授权 NFT
   const handleApproveNFT = async () => {
     if (!nftContract || !tokenId) {
-      setNftError('请输入 NFT 合约地址和代币 ID');
+      setNftError('Please enter NFT contract address and token ID');
       return;
     }
     console.log("=======handleApproveNFT start");
-
 
     setIsApproving(true);
     setNftError(null);
@@ -54,34 +53,28 @@ export default function CreateAuctionPage() {
       });
       setIsApproved(true);
     } catch (error: any) {
-      console.error('NFT 授权失败:', error);
+      console.error('NFT approval failed:', error);
       if (error.message.includes('Chain "Hardhat" does not support contract')) {
-        setNftError('当前网络不支持 ENS 解析。请确保使用完整的合约地址，而不是 ENS 域名。');
-      } else if (error.message.includes('添加网络失败')) {
-        setNftError('请手动在 MetaMask 中添加 Hardhat 网络后重试。网络配置：\n' +
-          '网络名称: Hardhat\n' +
+        setNftError('Current network does not support ENS resolution. Please use the full contract address instead of ENS domain.');
+      } else if (error.message.includes('Failed to add network')) {
+        setNftError('Please manually add Hardhat network to MetaMask. Network configuration:\n' +
+          'Network Name: Hardhat\n' +
           'RPC URL: http://localhost:8545\n' +
-          '链 ID: 31337');
-      } else if (error.message.includes('用户拒绝了授权请求')) {
-        setNftError('您取消了授权操作，请重试');
-      } else if (error.message.includes('钱包余额不足')) {
-        setNftError('钱包余额不足以支付 Gas 费用');
-      } else if (error.message.includes('你不是此 NFT 的所有者')) {
-        setNftError('您不是此 NFT 的所有者，无法授权');
+          'Chain ID: 31337');
+      } else if (error.message.includes('User rejected')) {
+        setNftError('You cancelled the approval operation, please try again');
+      } else if (error.message.includes('Insufficient funds')) {
+        setNftError('Insufficient wallet balance for gas fees');
+      } else if (error.message.includes('not the owner')) {
+        setNftError('You are not the owner of this NFT');
       } else {
-        setNftError(error.message || 'NFT 授权失败');
+        setNftError(error.message || 'NFT approval failed');
       }
       setIsApproved(false);
     } finally {
       setIsApproving(false);
     }
   };
-
-//   useEffect(() => {
-//     if (nftContract && tokenId) {
-//       handleApproveNFT();
-//     }
-//   }, [nftContract, tokenId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

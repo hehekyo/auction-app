@@ -75,28 +75,28 @@ export class AuctionService {
   private async resetHardhatNetwork(): Promise<void> {
     try {
       if (!window.ethereum) {
-        throw new Error("请安装 MetaMask 钱包");
+        throw new Error("Please install MetaMask wallet");
       }
 
-      // 检查当前使用的钱包
+      // Check current wallet
       const provider = new ethers.BrowserProvider(window.ethereum);
       await provider.send("eth_requestAccounts", []);
 
       try {
-        // 尝试切换到 Hardhat 网络 (chainId: 31337)
+        // Try to switch to Hardhat network (chainId: 31337)
         await window.ethereum.request({
           method: "wallet_switchEthereumChain",
-          params: [{ chainId: "0x7A69" }], // 31337 的十六进制
+          params: [{ chainId: "0x7A69" }], // Hex for 31337
         });
       } catch (switchError: any) {
-        // 如果网络不存在，则尝试添加网络
+        // If network doesn't exist, try to add it
         if (switchError.code === 4902) {
           try {
             await window.ethereum.request({
               method: "wallet_addEthereumChain",
               params: [
                 {
-                  chainId: "0x7A69", // 31337 的十六进制
+                  chainId: "0x7A69", // Hex for 31337
                   chainName: "Hardhat Local",
                   nativeCurrency: {
                     name: "ETH",
@@ -109,45 +109,52 @@ export class AuctionService {
             });
           } catch (addError: any) {
             if (addError.code === 4001) {
-              throw new Error("用户拒绝添加网络");
+              throw new Error("User rejected network addition");
             }
-            throw new Error("添加网络失败，请手动添加 Hardhat 网络");
+            throw new Error("Failed to add network. Please add Hardhat network manually");
           }
         } else if (switchError.code === 4001) {
-          throw new Error("用户拒绝切换网络");
+          throw new Error("User rejected network switch");
         } else {
           throw switchError;
         }
       }
 
-      // 验证当前网络
+      // Verify current network
       const chainId = await window.ethereum.request({ method: "eth_chainId" });
       if (chainId !== "0x7A69") {
-        // 31337 的十六进制
-        throw new Error("请确保已连接到 Hardhat 网络");
+        throw new Error("Please ensure you are connected to Hardhat network");
       }
 
-      console.log("已成功连接到 Hardhat 网络");
+      console.log("Successfully connected to Hardhat network");
     } catch (error: any) {
-      console.error("网络切换失败:", error);
+      console.error("Network switch failed:", error);
       throw new Error(
         error.message ||
-          "网络切换失败，请确保使用 MetaMask 并已添加 Hardhat 网络"
+          "Network switch failed. Please ensure MetaMask is installed and Hardhat network is added"
       );
     }
   }
 
   private async getContract(): Promise<ethers.Contract> {
     try {
+      // 检查是否在客户端环境
+      if (typeof window === 'undefined') {
+        throw new Error('This method is only available in browser environment');
+      }
+
       if (!this.contract) {
         if (!window.ethereum) {
-          throw new Error("请安装 MetaMask 钱包");
+          throw new Error("Please install MetaMask wallet");
         }
 
         this.provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await this.provider.getSigner();
-        const contractAddress =
-          process.env.NEXT_PUBLIC_AUCTION_CONTRACT_ADDRESS;
+        if (!signer) {
+          console.error("Signer is not available. Please connect your wallet.");
+          return;
+        }
+        const contractAddress = process.env.NEXT_PUBLIC_AUCTION_CONTRACT_ADDRESS;
 
         if (!contractAddress) {
           throw new Error("Auction contract address not configured");
@@ -158,11 +165,11 @@ export class AuctionService {
           AuctionManagerABI.abi,
           signer
         );
-        console.log("合约实例创建成功");
+        console.log("Contract instance created successfully");
       }
       return this.contract;
     } catch (error) {
-      console.error("获取合约实例失败:", error);
+      console.error("Failed to get contract instance:", error);
       throw error;
     }
   }
@@ -218,7 +225,7 @@ export class AuctionService {
       const auctionAddress = await contract.getAddress();
       const signerAddress = await signer.getAddress();
 
-      console.log("检查 NFT:", {
+      console.log("Checking NFT:", {
         nftContract,
         tokenId,
         auctionAddress,
@@ -244,19 +251,16 @@ export class AuctionService {
         // 首先检查代币是否存在
         const tokenCounter = await nftContractInstance.tokenCounter();
         if (BigInt(tokenId) >= tokenCounter) {
-          // 确保 tokenId 是 BigInt 类型
           throw new Error(
-            `Token ID ${tokenId} 不存在。当前最大 Token ID 为 ${
-              tokenCounter - 1n
-            }`
-          ); // 使用 BigInt
+            `Token ID ${tokenId} does not exist. Current max Token ID is ${tokenCounter - 1n}`
+          );
         }
 
         // 检查所有权
         const owner = await nftContractInstance.ownerOf(tokenId);
         if (owner.toLowerCase() !== signerAddress.toLowerCase()) {
           throw new Error(
-            `你不是此 NFT 的所有者。所有者: ${owner}, 你的地址: ${signerAddress}`
+            `You are not the owner of this NFT. Owner: ${owner}, Your address: ${signerAddress}`
           );
         }
 
@@ -270,13 +274,13 @@ export class AuctionService {
         // }
 
         // 检查特定 NFT 的授权状态
-        console.log("检查 NFT 授权状态...");
+        console.log("Checking NFT approval status...");
         const approvedAddress = await nftContractInstance.getApproved(tokenId);
-        console.log("当前授权地址:", approvedAddress);
-        console.log("目标授权地址:", auctionAddress);
+        console.log("Current approved address:", approvedAddress);
+        console.log("Target approval address:", auctionAddress);
 
         if (approvedAddress.toLowerCase() !== auctionAddress.toLowerCase()) {
-          console.log("需要授权，准备发送授权交易...");
+          console.log("Approval needed, preparing approval transaction...");
 
           // 准备交易参数
           const approveTx = {
@@ -287,15 +291,18 @@ export class AuctionService {
             ]),
           };
 
-          // 发送交易
-          console.log("发送授权交易...");
-          const tx = await signer.sendTransaction(approveTx);
-          console.log("授权交易已发送:", tx.hash);
+          console.log("Transaction parameters:", approveTx);
 
-          // 等待交易确认
-          console.log("等待交易确认...");
-          const receipt = await tx.wait();
-          console.log("授权交易已确认:", receipt);
+          // 发送交易
+    
+
+          try {
+            const tx = await signer.sendTransaction(approveTx);
+            await tx.wait(); // 等待交易确认
+            console.log("DAT approved successfully");
+        } catch (error) {
+            console.error("Failed to send transaction:", error);
+        }
 
           // 验证授权是否成功
           const newApprovedAddress = await nftContractInstance.getApproved(
@@ -304,7 +311,7 @@ export class AuctionService {
           if (
             newApprovedAddress.toLowerCase() !== auctionAddress.toLowerCase()
           ) {
-            throw new Error("NFT 授权失败，请重试");
+            throw new Error("NFT approval failed, please try again");
           }
         }
 
@@ -312,28 +319,16 @@ export class AuctionService {
         const tokenURI = await nftContractInstance.tokenURI(tokenId);
         return await this.getNFTMetadata(tokenURI);
       } catch (error: any) {
-        console.error("NFT 检查失败:", error);
-
-        if (
-          error.message.includes("ERC721NonexistentToken") ||
-          error.data?.message?.includes("ERC721NonexistentToken")
-        ) {
-          throw new Error(`Token ID ${tokenId} 不存在`);
+        console.error("NFT approval failed:", error);
+        if (error.code === 4001) {
+          throw new Error("User rejected approval request");
         }
-
-        if (error.message.includes("execution reverted")) {
-          const customError = error.data?.message || error.message;
-          if (customError.includes("ERC721NonexistentToken")) {
-            throw new Error(`Token ID ${tokenId} 不存在`);
-          }
-        }
-
         throw error;
       }
     } catch (error: any) {
-      console.error("NFT 授权失败:", error);
+      console.error("NFT approval failed:", error);
       if (error.code === 4001) {
-        throw new Error("用户拒绝了授权请求");
+        throw new Error("User rejected approval request");
       }
       throw error;
     }
@@ -359,7 +354,7 @@ export class AuctionService {
       const reservePriceWei = ethers.parseEther(reservePrice.toString());
       const priceDecrementWei = ethers.parseEther(priceDecrement.toString());
 
-      console.log("创建拍卖参数:", {
+      console.log("Creating auction parameters:", {
         auctionType,
         startingPriceWei,
         reservePriceWei,
@@ -382,36 +377,39 @@ export class AuctionService {
       );
 
       const receipt = await tx.wait();
-      console.log("拍卖创建成功，交易哈希:", tx.hash);
+      console.log("Auction created successfully, transaction hash:", tx.hash);
       return tx.hash;
     } catch (error) {
-      console.error("创建拍卖失败:", error);
+      console.error("Failed to create auction:", error);
       throw error;
     }
   }
 
-  public async placeBid(auctionId: string, bidAmount: number): Promise<void> {
+  public async bid(auctionId: string, bidAmount: number): Promise<void> {
     try {
       const contract = await this.getContract();
-      const signer = await this.provider!.getSigner();
-  
-      // 将出价金额转换为 Wei
+      
+      // 将出价金额转换为 BigNumber
       const bidAmountWei = ethers.parseEther(bidAmount.toString());
-  
-      console.log('出价参数:', {
+      
+      console.log('Bid parameters:', {
         auctionId,
         bidAmountWei: bidAmountWei.toString(),
       });
-  
-      // 调用合约的出价方法
-      const tx = await contract.placeBid(auctionId, { value: bidAmountWei });
-      console.log('出价交易已发送:', tx.hash);
-  
+
+      // 调用合约的 bid 方法，传入两个参数
+      const tx = await contract.bid(
+        auctionId,  // auctionId 作为第一个参数
+        bidAmountWei // bidAmount 作为第二个参数
+      );
+      
+      console.log('Bid transaction sent:', tx.hash);
+
       // 等待交易确认
       const receipt = await tx.wait();
-      console.log('出价交易已确认:', receipt);
+      console.log('Bid transaction confirmed:', receipt);
     } catch (error) {
-      console.error('出价失败:', error);
+      console.error('Failed to place bid:', error);
       throw error;
     }
   }
@@ -576,6 +574,134 @@ export class AuctionService {
       };
     } catch (error) {
       console.error("Failed to fetch auction details:", error);
+      throw error;
+    }
+  }
+
+  public async checkAllowance(auctionId: string, amount: string): Promise<BigNumber> {
+    const datTokenAddress = process.env.NEXT_PUBLIC_DAT_CONTRACT_ADDRESS;
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
+    const datContract = new ethers.Contract(datTokenAddress, datTokenAbi, signer);
+    const auctionAddress = await this.getContract().getAddress();
+    
+    return await datContract.allowance(await signer.getAddress(), auctionAddress);
+  }
+  
+  public async approve(auctionId: string, amount: string): Promise<void> {
+    const datTokenAddress = process.env.NEXT_PUBLIC_DAT_CONTRACT_ADDRESS;
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
+    const datContract = new ethers.Contract(datTokenAddress, datTokenAbi, signer);
+    const auctionAddress = await this.getContract().getAddress();
+    const amountWei = ethers.parseEther(amount);
+  
+    const approveTx = {
+      to: datTokenAddress,
+      data: datContract.interface.encodeFunctionData("approve", [
+        auctionAddress,
+        amountWei,
+      ]),
+    };
+  
+    const tx = await signer.sendTransaction(approveTx);
+    await tx.wait();
+  }
+
+  public async deposit(auctionId: string, depositAmount: string): Promise<void> {
+    try {
+      const datTokenAddress = process.env.NEXT_PUBLIC_DAT_CONTRACT_ADDRESS;
+
+      if (!datTokenAddress) {
+        throw new Error("DAT contract address not configured");
+      }
+
+      // 创建 Provider 和 Signer
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const signerAddress = await signer.getAddress();
+
+      // DAT Token 的 ABI
+      const datTokenAbi = [
+        "function approve(address spender, uint256 amount) returns (bool)",
+        "function allowance(address owner, address spender) view returns (uint256)"
+      ];
+
+      const datContract = new ethers.Contract(datTokenAddress, datTokenAbi, signer);
+      const contract = await this.getContract(); // 获取拍卖合约实例
+      const auctionAddress = await contract.getAddress(); // 获取拍卖合约地址
+      const depositAmountWei = ethers.parseEther(depositAmount); // 将押金金额转换为 Wei
+
+      console.log('Checking DAT allowance...');
+      const allowance = await datContract.allowance(signerAddress, auctionAddress);
+
+      // 检查授权额度
+      if (allowance < depositAmountWei) {
+        console.log('Requesting DAT approval...');
+        
+        // 准备交易参数
+        const approveTx = {
+          to: datTokenAddress, // DAT 合约地址
+          data: datContract.interface.encodeFunctionData("approve", [
+            auctionAddress,
+            depositAmountWei,
+          ]),
+        };
+
+        console.log("Transaction parameters:", approveTx);
+        try {
+          // 发送交易以请求授权
+          const tx = await signer.sendTransaction(approveTx);
+          await tx.wait(); // 等待交易确认
+          console.log("DAT approved successfully");
+        } catch (error) {
+          console.error("Failed to send approval transaction:", error);
+          throw new Error("Approval transaction failed");
+        }
+      }
+
+      // 发送押金交易
+      console.log('Sending deposit transaction...');
+      const depositTx = await contract.deposit(auctionId, {
+        gasLimit: 1000000 // 设定一个合理的 gas limit
+      });
+      await depositTx.wait(); // 等待押金交易确认
+      console.log('Deposit payment confirmed');
+    } catch (error: any) {
+      console.error('Failed to pay deposit:', error);
+      throw error;
+    }
+  }
+
+  public async getDATBalance(address: string): Promise<string> {
+    try {
+      const datTokenAddress = process.env.NEXT_PUBLIC_DAT_CONTRACT_ADDRESS;
+      
+      if (!datTokenAddress) {
+        throw new Error("DAT contract address not configured");
+      }
+      
+      // 确保 provider 已初始化
+      const provider = await this.blockchainService.getProvider();
+      
+      // DAT Token 的基础 ABI
+      const datTokenAbi = [
+        "function balanceOf(address account) view returns (uint256)",
+        "function decimals() view returns (uint8)"
+      ];
+
+      const datContract = new ethers.Contract(
+        datTokenAddress,
+        datTokenAbi,
+        provider
+      );
+
+      const balance = await datContract.balanceOf(address);
+      const decimals = await datContract.decimals();
+      
+      return ethers.formatUnits(balance, decimals);
+    } catch (error) {
+      console.error("Failed to get DAT balance:", error);
       throw error;
     }
   }

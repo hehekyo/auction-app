@@ -36,7 +36,7 @@ export default function AuctionDetailsPage() {
   }, [currentAuction]);
 
   const handleBidSuccess = () => {
-    // 刷新拍卖详情
+    // Refresh auction details
     dispatch(fetchAuctionDetails(params.id as string));
   };
 
@@ -142,7 +142,7 @@ export default function AuctionDetailsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentAuction?.bidHistory?.length > 0 ? (
+                  {currentAuction && currentAuction?.bidHistory?.length > 0 ? (
                     currentAuction.bidHistory.map((bid, index) => (
                       <tr key={index} className="border-t border-gray-700">
                         <td className="py-3">{bid.bidder}</td>
@@ -169,7 +169,7 @@ export default function AuctionDetailsPage() {
             className="w-full py-4 rounded-xl text-lg font-bold bg-blue-600 hover:bg-blue-700 text-white transition-colors disabled:bg-gray-500"
             disabled={isSubmitting}
           >
-            {isSubmitting ? '处理中...' : 'Place Bid'}
+            {isSubmitting ? 'Processing...' : 'Place Bid'}
           </button>
 
           {/* Bid Modal */}
@@ -179,6 +179,7 @@ export default function AuctionDetailsPage() {
             auctionId={currentAuction?.auctionDetails.auctionId}
             minBid={Number(currentAuction?.auctionDetails.startingPrice)}
             highestBid={Number(currentAuction?.auctionDetails.highestBid)}
+            depositAmount={currentAuction?.auctionDetails.depositAmount}
             isSubmitting={isSubmitting}
             onSuccess={handleBidSuccess}
           />

@@ -1,16 +1,19 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import AuctionCard from '@/components/AuctionCard';
-import { FaPlus } from 'react-icons/fa';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { fetchAuctions } from '@/store/auctionSlice';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import AuctionCard from "@/components/AuctionCard";
+import { FaPlus } from "react-icons/fa";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchAuctions } from "@/store/auctionSlice";
+import { log } from "console";
 
 export default function AuctionsPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { auctions, loading, error } = useAppSelector((state) => state.auctions);
+  const { auctions, loading, error } = useAppSelector(
+    (state) => state.auctions
+  );
 
   useEffect(() => {
     dispatch(fetchAuctions());
@@ -19,6 +22,7 @@ export default function AuctionsPage() {
   const handleViewDetail = (auctionId: string) => {
     router.push(`/auctions/${auctionId}`);
   };
+  console.log("=============auctions", auctions.active);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -27,9 +31,9 @@ export default function AuctionsPage() {
         <div>
           <h1 className="text-3xl font-bold text-gray-500">NFT Auctions</h1>
         </div>
-        
+
         <button
-          onClick={() => router.push('/auctions/create')}
+          onClick={() => router.push("/auctions/create")}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg 
             hover:bg-blue-700 transition-colors"
         >
@@ -48,8 +52,8 @@ export default function AuctionsPage() {
           <div className="text-red-500 text-center">
             <p className="text-xl mb-4">😕</p>
             <p>{error}</p>
-            <button 
-              onClick={() => dispatch(fetchAuctions())} 
+            <button
+              onClick={() => dispatch(fetchAuctions())}
               className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
             >
               Retry
@@ -59,19 +63,18 @@ export default function AuctionsPage() {
       ) : auctions && auctions.length === 0 ? (
         <div className="text-center text-gray-400 py-12">
           <p className="mb-4">No active auctions at the moment</p>
-         
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {auctions.map((auction) => (
+          {auctions.active.map((auction) => (
             <AuctionCard
-              key={auction.args.auctionId}
-              {...auction.args}
-              onViewDetail={() => handleViewDetail(auction.args.auctionId)}
+              key={auction.auctionId}
+              {...auction}
+              onViewDetail={() => handleViewDetail(auction.auctionId)}
             />
           ))}
         </div>
       )}
     </div>
   );
-} 
+}

@@ -1,44 +1,46 @@
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { formatDistance } from 'date-fns';
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { formatDistance } from "date-fns";
 
-type AuctionStatus = 'upcoming' | 'active' | 'ended';
+type AuctionStatus = "ongoing" | "ended";
 
 type AuctionCardProps = {
+  transactionHash: string;
+  actionType: string;
   auctionId: string;
   seller: string;
-  nftContract: string;
+  nftAddress: string;
   tokenId: string;
   tokenURI: string;
-  auctionType: string;
+  startingAt: string;
+  endingAt: string;
   startingPrice: string;
-  reservePrice: string;
-  duration: string;
-  depositAmount: string;
-  startTime: string;
-  endTime: string;
+  highestBid: string;
+  highestBidder: string;
+  bidders: Array<{ bidder: string; value: string }>;
+  status: string;
   onViewDetail: () => void;
 };
 
 const METADATA_CACHE = new Map<string, any>();
 
 const getIPFSUrl = (url: string) => {
-  if (url.startsWith('ipfs://')) {
-    return url.replace('ipfs://', 'https://ipfs.io/ipfs/');
+  if (url.startsWith("ipfs://")) {
+    return url.replace("ipfs://", "https://ipfs.io/ipfs/");
   }
   return url;
 };
 
 // 检查 URL 是否是图片
 const isImageUrl = (url: string) => {
-  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
-  return imageExtensions.some(ext => url.toLowerCase().endsWith(ext));
+  const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"];
+  return imageExtensions.some((ext) => url.toLowerCase().endsWith(ext));
 };
 
 // 获取元数据的函数
 const getNFTMetadata = async (tokenURI: string) => {
   const cacheKey = tokenURI;
-  
+
   if (METADATA_CACHE.has(cacheKey)) {
     return METADATA_CACHE.get(cacheKey);
   }
@@ -47,8 +49,8 @@ const getNFTMetadata = async (tokenURI: string) => {
     // 如果 tokenURI 直接是图片 URL
     if (isImageUrl(tokenURI)) {
       const metadata = {
-        name: 'NFT',
-        image: getIPFSUrl(tokenURI)
+        name: "NFT",
+        image: getIPFSUrl(tokenURI),
       };
       METADATA_CACHE.set(cacheKey, metadata);
       return metadata;
@@ -57,20 +59,20 @@ const getNFTMetadata = async (tokenURI: string) => {
     // 否则尝试获取元数据
     const response = await fetch(getIPFSUrl(tokenURI));
     const metadata = await response.json();
-    
+
     // 确保 image URL 也经过 IPFS 处理
     if (metadata.image) {
       metadata.image = getIPFSUrl(metadata.image);
     }
-    
+
     METADATA_CACHE.set(cacheKey, metadata);
     return metadata;
   } catch (error) {
-    console.error('Error fetching metadata:', error);
+    console.error("Error fetching metadata:", error);
     // 如果解析失败，将 tokenURI 作为图片 URL
     const fallbackMetadata = {
-      name: 'NFT',
-      image: getIPFSUrl(tokenURI)
+      name: "NFT",
+      image: getIPFSUrl(tokenURI),
     };
     METADATA_CACHE.set(cacheKey, fallbackMetadata);
     return fallbackMetadata;
@@ -78,22 +80,27 @@ const getNFTMetadata = async (tokenURI: string) => {
 };
 
 export default function AuctionCard({
+  transactionHash,
+  actionType,
   auctionId,
   seller,
-  nftContract,
+  nftAddress,
   tokenId,
   tokenURI,
-  auctionType,
+  startingAt,
+  endingAt,
   startingPrice,
-  reservePrice,
-  depositAmount,
-  startTime,
-  endTime,
-  onViewDetail
+  highestBid,
+  highestBidder,
+  bidders,
+  status,
+  onViewDetail,
 }: AuctionCardProps) {
-  const [nftMetadata, setNftMetadata] = useState<{ name: string; image: string } | null>(null);
-  const [timeLeft, setTimeLeft] = useState<string>('');
-  const [status, setStatus] = useState<AuctionStatus>('active');
+  const [nftMetadata, setNftMetadata] = useState<{
+    name: string;
+    image: string;
+  } | null>(null);
+  const [timeLeft, setTimeLeft] = useState<string>("");
 
   // 获取 NFT 元数据
   useEffect(() => {
@@ -103,33 +110,25 @@ export default function AuctionCard({
 
         setNftMetadata(metadata);
       } catch (error) {
-        console.error('Error loading NFT metadata:', error);
+        console.error("Error loading NFT metadata:", error);
       }
     };
-    
+
     loadMetadata();
   }, [tokenURI]);
 
-    // 获取拍卖状态
-    const getAuctionStatus = (startTime: string, endTime: string): AuctionStatus => {
-      const now = Date.now();
-      const start = Number(startTime) * 1000;
-      const end = Number(endTime) * 1000;
-  
-      if (now < start) return 'upcoming';
-      if (now > end) return 'ended';
-      return 'active';
-    };
+  // 获取拍卖状态 - 使用传入的 status 值
+  const getAuctionStatus = (status: number): AuctionStatus => {
+    return status === 1 ? "ongoing" : "ended";
+  };
 
-      // 获取状态标签样式
+  // 获取状态标签样式
   const getStatusStyle = (status: AuctionStatus) => {
     switch (status) {
-      case 'upcoming':
-        return 'bg-blue-500 text-white';
-      case 'active':
-        return 'bg-green-500 text-white';
-      case 'ended':
-        return 'bg-gray-500 text-white';
+      case "ongoing":
+        return "bg-green-500 text-white";
+      case "ended":
+        return "bg-gray-500 text-white";
     }
   };
 
@@ -137,16 +136,13 @@ export default function AuctionCard({
   useEffect(() => {
     const updateTimeAndStatus = () => {
       const now = Date.now();
-      const start = Number(startTime) * 1000;
-      const end = Number(endTime) * 1000;
-      const currentStatus = getAuctionStatus(startTime, endTime);
-      
-      setStatus(currentStatus);
+      const end = Number(endingAt) * 1000;
+      // const currentStatus = getAuctionStatus(status);
 
-      if (currentStatus === 'upcoming') {
-        setTimeLeft(`Starts ${formatDistance(start, now, { addSuffix: true })}`);
-      } else if (currentStatus === 'ended') {
-        setTimeLeft('Auction ended');
+      // setAuctionStatus(currentStatus);
+
+      if (status === 2) {
+        setTimeLeft("Auction Ended");
       } else {
         setTimeLeft(`Ends ${formatDistance(end, now, { addSuffix: true })}`);
       }
@@ -156,19 +152,16 @@ export default function AuctionCard({
     const timer = setInterval(updateTimeAndStatus, 1000);
 
     return () => clearInterval(timer);
-  }, [startTime, endTime]);
-
- 
+  }, [status, endingAt]);
 
   return (
-    <div className="bg-gray-800 rounded-xl overflow-hidden  hover:shadow-lg transition-transform  hover:scale-105 hover:bg-gray-750"
->
+    <div className="bg-gray-800 rounded-xl overflow-hidden  hover:shadow-lg transition-transform  hover:scale-105 hover:bg-gray-750">
       {/* NFT Image */}
       <div className="relative aspect-square">
         {nftMetadata?.image ? (
           <Image
             src={nftMetadata.image}
-            alt={nftMetadata.name || 'NFT'}
+            alt={nftMetadata.name || "NFT"}
             layout="fill"
             objectFit="cover"
             className="transition-transform"
@@ -176,10 +169,14 @@ export default function AuctionCard({
         ) : (
           <div className="w-full h-full bg-gray-700 animate-pulse" />
         )}
-        
+
         {/* Status Badge */}
-        <div className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-medium ${getStatusStyle(status)}`}>
-          {status === 'upcoming' ? 'Upcoming' : status === 'active' ? 'Live' : 'Ended'}
+        <div
+          className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-medium ${getStatusStyle(
+            status === "1" ? "ongoing" : "ended"
+          )}`}
+        >
+          {status === "1" ? "Active" : "Ended"}
         </div>
       </div>
 
@@ -189,7 +186,7 @@ export default function AuctionCard({
           <div className="flex justify-between">
             <span className="text-gray-400">Type</span>
             <span className="text-gray-200">
-              {auctionType === '0' ? 'English' : 'Dutch'} Auction
+              {actionType === "0" ? "English" : "Dutch"} Auction
             </span>
           </div>
 
@@ -201,7 +198,7 @@ export default function AuctionCard({
           <div className="flex justify-between">
             <span className="text-gray-400">NFT Contract</span>
             <span className="text-gray-200">
-              {`${nftContract.slice(0, 6)}...${nftContract.slice(-4)}`}
+              {`${nftAddress.slice(0, 6)}...${nftAddress.slice(-4)}`}
             </span>
           </div>
 
@@ -211,17 +208,10 @@ export default function AuctionCard({
           </div>
 
           <div className="flex justify-between">
-            <span className="text-gray-400">Status</span>
-            <span className={`font-medium ${
-              status === 'active' ? 'text-green-400' : 
-              status === 'upcoming' ? 'text-blue-400' : 
-              'text-gray-400'
-            }`}>
-              {timeLeft}
-            </span>
+            <span className="text-gray-400">Highest Bid</span>
+            <span className="text-gray-200">{highestBid || "No bids"} DAT</span>
           </div>
         </div>
-
         {/* View Detail Button */}
         <button
           onClick={(e) => {
@@ -232,16 +222,16 @@ export default function AuctionCard({
             transition-colors duration-200 flex items-center justify-center space-x-2"
         >
           <span>View Details</span>
-          <svg 
-            className="w-4 h-4" 
-            fill="none" 
-            stroke="currentColor" 
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
               d="M9 5l7 7-7 7"
             />
           </svg>

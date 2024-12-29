@@ -1,19 +1,21 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { AuctionService } from '@/services/auctionService';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { AuctionService } from "@/services/auctionService";
 
 export interface Auction {
-    auctionId: string;
-    seller: string;
-    nftContract: string;
-    tokenId: string;
-    tokenURI: string;
-    auctionType: string;
-    startingPrice: string;
-    reservePrice: string;
-    duration: string;
-    depositAmount: string;
-    startTime: string;
-    endTime: string;
+  auctionType: string;
+  transactionHash: string;
+  auctionId: string;
+  seller: string;
+  nftAddress: string;
+  tokenId: string;
+  tokenURI: string;
+  startingAt: string;
+  endingAt: string;
+  startingPrice: string;
+  status: string;
+  highestBid: string;
+  highestBidder: string;
+  bidders: Array<{ bidder: string; bidAmount: string; bidTime: string }>;
 }
 
 interface BidEvent {
@@ -22,19 +24,9 @@ interface BidEvent {
   timestamp: string;
 }
 
-interface AuctionDetails extends Auction {
-  highestBid: string;
-  highestBidder: string;
-}
-
-interface AuctionData {
-  auctionDetails: AuctionDetails;
-  bidHistory: BidEvent[];
-}
-
 interface AuctionState {
   auctions: Auction[];
-  currentAuction: AuctionData | null;
+  currentAuction: Auction | null;
   loading: boolean;
   error: string | null;
 }
@@ -49,31 +41,37 @@ const initialState: AuctionState = {
 const auctionService = AuctionService.getInstance();
 
 export const fetchAuctions = createAsyncThunk(
-  'auctions/fetchAuctions',
+  "auctions/fetchAuctions",
   async () => {
     try {
       const auctions = await auctionService.getAuctions();
       return auctions;
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : 'Failed to fetch auctions');
+      throw new Error(
+        error instanceof Error ? error.message : "Failed to fetch auctions"
+      );
     }
   }
 );
 
-export const fetchAuctionDetails = createAsyncThunk(
-  'auctions/fetchAuctionDetails',
+export const fetchAuctionDetail = createAsyncThunk(
+  "auctions/fetchAuctionDetail",
   async (auctionId: string) => {
     try {
-      const details = await auctionService.getAuctionDetails(auctionId);
-      return details;
+      const details = await auctionService.getAuctionDetail(auctionId);
+      return { auctionDetails: details };
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : 'Failed to fetch auction details');
+      throw new Error(
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch auction details"
+      );
     }
   }
 );
 
 const auctionSlice = createSlice({
-  name: 'auctions',
+  name: "auctions",
   initialState,
   reducers: {
     clearCurrentAuction: (state) => {
@@ -81,7 +79,7 @@ const auctionSlice = createSlice({
     },
     clearError: (state) => {
       state.error = null;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -96,23 +94,23 @@ const auctionSlice = createSlice({
       })
       .addCase(fetchAuctions.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Failed to fetch auctions';
+        state.error = action.error.message || "Failed to fetch auctions";
       })
       // 处理获取拍卖详情
-      .addCase(fetchAuctionDetails.pending, (state) => {
+      .addCase(fetchAuctionDetail.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchAuctionDetails.fulfilled, (state, action) => {
+      .addCase(fetchAuctionDetail.fulfilled, (state, action) => {
         state.loading = false;
         state.currentAuction = action.payload;
       })
-      .addCase(fetchAuctionDetails.rejected, (state, action) => {
+      .addCase(fetchAuctionDetail.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Failed to fetch auction details';
+        state.error = action.error.message || "Failed to fetch auction details";
       });
   },
 });
 
 export const { clearCurrentAuction, clearError } = auctionSlice.actions;
-export default auctionSlice.reducer; 
+export default auctionSlice.reducer;

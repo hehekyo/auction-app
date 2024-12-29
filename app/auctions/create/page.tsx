@@ -116,7 +116,7 @@ export default function CreateAuctionPage() {
           Create New Auction
         </h1>
 
-        <div className="grid grid-cols-5 gap-8">
+        <div className="grid grid-cols-6 gap-8">
           {/* Left Side - Steps */}
           <div className="col-span-2 space-y-4">
             <div
@@ -205,7 +205,7 @@ export default function CreateAuctionPage() {
           </div>
 
           {/* Right Side - Current Step Content */}
-          <div className="col-span-3 bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+          <div className="col-span-4 bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
             {currentStep === 1 && (
               <div className="space-y-6">
                 <h2 className="text-xl font-bold mb-4 text-gray-900">

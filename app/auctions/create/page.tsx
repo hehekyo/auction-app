@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MdArrowBack } from "react-icons/md";
 import Image from "next/image";
 import { AuctionService } from "@/services/auctionService";
-import { ethers } from "ethers";
 
 interface NFTInfo {
   tokenURI: string;
@@ -16,29 +15,34 @@ interface NFTInfo {
 
 export default function CreateAuctionPage() {
   const router = useRouter();
+  const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
+
+  // Step 1 - Auction Type
   const [auctionType, setAuctionType] = useState<"0" | "1">("0");
-  const [startingPrice, setStartingPrice] = useState(200);
-  const [reservePrice, setReservePrice] = useState(180);
-  const [duration, setDuration] = useState(120);
+
+  // Step 2 - NFT Details
   const [nftContract, setNftContract] = useState(
     "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
   );
   const [tokenId, setTokenId] = useState("4");
-  const [priceDecrement, setPriceDecrement] = useState(0);
-  const [decrementInterval, setDecrementInterval] = useState(0);
   const [nftInfo, setNftInfo] = useState<NFTInfo | null>(null);
   const [nftError, setNftError] = useState<string | null>(null);
   const [isApproving, setIsApproving] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
 
-  // 验证并授权 NFT
+  // Step 3 - Auction Settings
+  const [startingPrice, setStartingPrice] = useState(200);
+  const [duration, setDuration] = useState(120);
+  const [priceDecrement, setPriceDecrement] = useState(0);
+  const [decrementInterval, setDecrementInterval] = useState(0);
+
+  // NFT Approval Handler
   const handleApproveNFT = async () => {
     if (!nftContract || !tokenId) {
       setNftError("Please enter NFT contract address and token ID");
       return;
     }
-    console.log("=======handleApproveNFT start");
 
     setIsApproving(true);
     setNftError(null);
@@ -48,7 +52,10 @@ export default function CreateAuctionPage() {
         nftContract,
         Number(tokenId)
       );
-      console.log("=======auctionService.approveNFT");
+
+      await new Promise((resolve) =>
+        setTimeout(resolve, 1000 + Math.random() * 1000)
+      );
 
       setNftInfo({
         tokenURI: metadata.tokenURI,
@@ -59,34 +66,15 @@ export default function CreateAuctionPage() {
       setIsApproved(true);
     } catch (error: any) {
       console.error("NFT approval failed:", error);
-      if (error.message.includes('Chain "Hardhat" does not support contract')) {
-        setNftError(
-          "Current network does not support ENS resolution. Please use the full contract address instead of ENS domain."
-        );
-      } else if (error.message.includes("Failed to add network")) {
-        setNftError(
-          "Please manually add Hardhat network to MetaMask. Network configuration:\n" +
-            "Network Name: Hardhat\n" +
-            "RPC URL: http://localhost:8545\n" +
-            "Chain ID: 31337"
-        );
-      } else if (error.message.includes("User rejected")) {
-        setNftError("You cancelled the approval operation, please try again");
-      } else if (error.message.includes("Insufficient funds")) {
-        setNftError("Insufficient wallet balance for gas fees");
-      } else if (error.message.includes("not the owner")) {
-        setNftError("You are not the owner of this NFT");
-      } else {
-        setNftError(error.message || "NFT approval failed");
-      }
+      setNftError(error.message || "NFT approval failed");
       setIsApproved(false);
     } finally {
       setIsApproving(false);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Final Submit Handler
+  const handleSubmit = async () => {
     if (!isApproved) {
       setNftError("Please approve NFT first");
       return;
@@ -95,29 +83,18 @@ export default function CreateAuctionPage() {
     setLoading(true);
     try {
       const auctionService = AuctionService.getInstance();
-      const durationInSeconds = Math.floor(duration * 3600); // 转换小时为秒
-
-      console.log("===starting createAuction");
-
       const txHash = await auctionService.createAuction(
         nftContract,
         Number(tokenId),
         startingPrice,
         duration
       );
-
       console.log("Auction created successfully:", txHash);
       router.push("/auctions");
     } catch (error) {
       console.error("Error creating auction:", error);
       if (error instanceof Error) {
-        if (error.message.includes("Please install MetaMask")) {
-          alert(
-            "Please install MetaMask wallet\nVisit https://metamask.io/download/ to install"
-          );
-        } else {
-          alert(error.message);
-        }
+        alert(error.message);
       }
     } finally {
       setLoading(false);
@@ -125,233 +102,376 @@ export default function CreateAuctionPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-4">
+    <div className="container mx-auto px-4 py-4 ">
       <button
         onClick={() => router.push("/auctions")}
-        className="mb-4 text-gray-400 hover:text-gray-300 flex items-center gap-2"
+        className="mb-4 text-gray-600 hover:text-gray-800 flex items-center gap-2"
       >
         <MdArrowBack className="w-5 h-5" />
         Back to Auctions
       </button>
 
-      <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-100 mb-4 text-center">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8 mt-8">
           Create New Auction
         </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Auction Type */}
-          <div className="bg-gradient-to-r from-gray-800 to-gray-700 rounded-xl p-4">
-            <div className="grid grid-cols-2 gap-3">
-              <label
-                className={`
-                flex flex-col items-center p-3 rounded-lg cursor-pointer transition-all
-                ${
-                  auctionType === "0"
-                    ? "bg-blue-600 ring-2 ring-blue-400"
-                    : "bg-gray-600 hover:bg-gray-500"
-                }
-              `}
-              >
-                <input
-                  type="radio"
-                  value="0"
-                  checked={auctionType === "0"}
-                  onChange={(e) => setAuctionType(e.target.value as "0" | "1")}
-                  className="sr-only"
-                />
-                <span className="text-lg font-bold text-white">
-                  English Auction
-                </span>
-                <span className="text-xs text-gray-200">
-                  Price starts low and increases
-                </span>
-              </label>
-
-              <label
-                className={`
-                flex flex-col items-center p-3 rounded-lg cursor-pointer transition-all
-                ${
-                  auctionType === "1"
-                    ? "bg-blue-600 ring-2 ring-blue-400"
-                    : "bg-gray-600 hover:bg-gray-500"
-                }
-              `}
-              >
-                <input
-                  type="radio"
-                  value="1"
-                  checked={auctionType === "1"}
-                  onChange={(e) => setAuctionType(e.target.value as "0" | "1")}
-                  className="sr-only"
-                />
-                <span className="text-lg font-bold text-white">
-                  Dutch Auction
-                </span>
-                <span className="text-xs text-gray-200">
-                  Price starts high and decreases
-                </span>
-              </label>
-            </div>
-          </div>
-
-          {/* NFT Selection */}
-          <div className="bg-gray-800 rounded-xl p-4">
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-gray-300 mb-1 text-sm font-medium">
-                    NFT Contract Address
-                  </label>
-                  <input
-                    type="text"
-                    value={nftContract}
-                    onChange={(e) => {
-                      setNftContract(e.target.value);
-                      setIsApproved(false);
-                    }}
-                    className="w-full bg-gray-700 text-gray-100 rounded-lg p-2 text-sm border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    placeholder="0x..."
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-gray-300 mb-1 text-sm font-medium">
-                    Token ID
-                  </label>
-                  <input
-                    type="text"
-                    value={tokenId}
-                    onChange={(e) => {
-                      setTokenId(e.target.value);
-                      setIsApproved(false);
-                    }}
-                    className="w-full bg-gray-700 text-gray-100 rounded-lg p-2 text-sm border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleApproveNFT}
-                  disabled={isApproving || !nftContract || !tokenId}
-                  className="w-full py-2 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-500 
-                    text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        <div className="grid grid-cols-5 gap-8">
+          {/* Left Side - Steps */}
+          <div className="col-span-2 space-y-4">
+            <div
+              className={`p-4 rounded-lg cursor-pointer transition-all ${
+                currentStep === 1
+                  ? "bg-blue-50 border-2 border-blue-500 text-blue-700"
+                  : "bg-white hover:bg-gray-50 border border-gray-200"
+              }`}
+              onClick={() => setCurrentStep(1)}
+            >
+              <div className="flex items-center gap-3">
+                <span
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
+                  ${
+                    currentStep === 1
+                      ? "bg-blue-100 text-blue-700"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
                 >
-                  {isApproving
-                    ? "Approving..."
-                    : isApproved
-                    ? "Approved ✓"
-                    : "Approve NFT"}
-                </button>
-
-                {nftError && (
-                  <div className="text-red-500 text-xs bg-red-500/10 p-2 rounded-lg">
-                    {nftError}
-                  </div>
-                )}
+                  1
+                </span>
+                <div>
+                  <h3 className="font-semibold">Select Auction Type</h3>
+                  <p className="text-sm text-gray-500">
+                    Choose auction mechanism
+                  </p>
+                </div>
               </div>
+            </div>
 
-              <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-700">
-                {nftInfo?.image ? (
-                  <Image
-                    src={nftInfo.image}
-                    alt={nftInfo.name || "NFT Preview"}
-                    fill
-                    className="object-contain"
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">
-                    {isApproving ? "Loading..." : "NFT Preview"}
-                  </div>
-                )}
+            <div
+              className={`p-4 rounded-lg cursor-pointer transition-all ${
+                currentStep === 2
+                  ? "bg-blue-50 border-2 border-blue-500 text-blue-700"
+                  : "bg-white hover:bg-gray-50 border border-gray-200"
+              }`}
+              onClick={() => currentStep > 1 && setCurrentStep(2)}
+            >
+              <div className="flex items-center gap-3">
+                <span
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
+                  ${
+                    currentStep === 2
+                      ? "bg-blue-100 text-blue-700"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                >
+                  2
+                </span>
+                <div>
+                  <h3 className="font-semibold">NFT Details</h3>
+                  <p className="text-sm text-gray-500">
+                    Select and approve NFT
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div
+              className={`p-4 rounded-lg cursor-pointer transition-all ${
+                currentStep === 3
+                  ? "bg-blue-50 border-2 border-blue-500 text-blue-700"
+                  : "bg-white hover:bg-gray-50 border border-gray-200"
+              }`}
+              onClick={() => currentStep > 2 && setCurrentStep(3)}
+            >
+              <div className="flex items-center gap-3">
+                <span
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
+                  ${
+                    currentStep === 3
+                      ? "bg-blue-100 text-blue-700"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                >
+                  3
+                </span>
+                <div>
+                  <h3 className="font-semibold">Auction Settings</h3>
+                  <p className="text-sm text-gray-500">
+                    Set price and duration
+                  </p>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Auction Settings */}
-          <div className="bg-gray-800 rounded-xl p-4">
-            <div className="grid md:grid-cols-3 gap-3">
-              <div>
-                <label className="block text-gray-300 mb-1 text-sm font-medium">
-                  Starting Price (DAT)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={startingPrice}
-                  onChange={(e) => setStartingPrice(parseFloat(e.target.value))}
-                  className="w-full bg-gray-700 text-gray-100 rounded-lg p-2 text-sm border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-300 mb-1 text-sm font-medium">
-                  Duration (hours)
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  value={duration}
-                  onChange={(e) => setDuration(parseFloat(e.target.value))}
-                  className="w-full bg-gray-700 text-gray-100 rounded-lg p-2 text-sm border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Dutch Auction Specific Fields */}
-            {auctionType === "1" && (
-              <div className="grid md:grid-cols-2 gap-3 mt-3 pt-3 border-t border-gray-700">
-                <div>
-                  <label className="block text-gray-300 mb-1 text-sm font-medium">
-                    Price Decrement (DAT)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={priceDecrement}
-                    onChange={(e) =>
-                      setPriceDecrement(parseFloat(e.target.value))
+          {/* Right Side - Current Step Content */}
+          <div className="col-span-3 bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+            {currentStep === 1 && (
+              <div className="space-y-6">
+                <h2 className="text-xl font-bold mb-4 text-gray-900">
+                  Select Auction Type
+                </h2>
+                <div className="grid grid-cols-2 gap-4">
+                  <label
+                    className={`
+                    flex flex-col items-center p-4 rounded-xl cursor-pointer transition-all border-2
+                    ${
+                      auctionType === "0"
+                        ? "bg-blue-50 border-blue-500 text-blue-700"
+                        : "bg-white border-gray-200 hover:bg-gray-50"
                     }
-                    className="w-full bg-gray-700 text-gray-100 rounded-lg p-2 text-sm border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    required
-                  />
+                  `}
+                  >
+                    <input
+                      type="radio"
+                      value="0"
+                      checked={auctionType === "0"}
+                      onChange={(e) =>
+                        setAuctionType(e.target.value as "0" | "1")
+                      }
+                      className="sr-only"
+                    />
+                    <span className="text-xl font-bold mb-2">
+                      English Auction
+                    </span>
+                    <span className="text-sm text-center text-gray-600">
+                      Price starts low and increases with each bid
+                    </span>
+                  </label>
+
+                  <label
+                    className={`
+                    flex flex-col items-center p-4 rounded-xl cursor-pointer transition-all border-2
+                    ${
+                      auctionType === "1"
+                        ? "bg-blue-50 border-blue-500 text-blue-700"
+                        : "bg-white border-gray-200 hover:bg-gray-50"
+                    }
+                  `}
+                  >
+                    <input
+                      type="radio"
+                      value="1"
+                      checked={auctionType === "1"}
+                      onChange={(e) =>
+                        setAuctionType(e.target.value as "0" | "1")
+                      }
+                      className="sr-only"
+                    />
+                    <span className="text-xl font-bold mb-2">
+                      Dutch Auction
+                    </span>
+                    <span className="text-sm text-center text-gray-600">
+                      Price starts high and decreases over time
+                    </span>
+                  </label>
+                </div>
+                <button
+                  onClick={() => setCurrentStep(2)}
+                  className="w-full mt-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Continue
+                </button>
+              </div>
+            )}
+
+            {currentStep === 2 && (
+              <div className="space-y-6">
+                <h2 className="text-xl font-bold mb-4 text-gray-900">
+                  NFT Details
+                </h2>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1 text-gray-700">
+                        NFT Contract Address
+                      </label>
+                      <input
+                        type="text"
+                        value={nftContract}
+                        onChange={(e) => {
+                          setNftContract(e.target.value);
+                          setIsApproved(false);
+                        }}
+                        className="w-full bg-white border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="0x..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1 text-gray-700">
+                        Token ID
+                      </label>
+                      <input
+                        type="text"
+                        value={tokenId}
+                        onChange={(e) => {
+                          setTokenId(e.target.value);
+                          setIsApproved(false);
+                        }}
+                        className="w-full bg-white border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+
+                    <button
+                      onClick={handleApproveNFT}
+                      disabled={isApproving || !nftContract || !tokenId}
+                      className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isApproving
+                        ? "Approving..."
+                        : isApproved
+                        ? "Approved ✓"
+                        : "Approve NFT"}
+                    </button>
+
+                    {nftError && (
+                      <div className="text-red-500 text-sm bg-red-500/10 p-3 rounded-lg">
+                        {nftError}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="relative aspect-square rounded-xl bg-gray-100 overflow-hidden border border-gray-200">
+                    {nftInfo?.image ? (
+                      <Image
+                        src={nftInfo.image}
+                        alt={nftInfo.name || "NFT Preview"}
+                        fill
+                        loading="lazy"
+                        className="object-contain opacity-0 transition-opacity duration-1000"
+                        onLoadingComplete={(image) => {
+                          setTimeout(() => {
+                            image.classList.remove("opacity-0");
+                          }, 1000 + Math.random() * 1000);
+                        }}
+                        placeholder="blur"
+                        blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDABQODxIPDRQSEBIXFRQdHx4dHRsdHR4dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR3/2wBDAR0XFyAeIRshIRshHRsdHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR0dHR3/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAb/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+                        {isApproving ? (
+                          <div className="animate-pulse flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                            <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                            <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                          </div>
+                        ) : (
+                          "NFT Preview"
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-gray-300 mb-1 text-sm font-medium">
-                    Decrement Interval (Seconds)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={decrementInterval}
-                    onChange={(e) =>
-                      setDecrementInterval(parseInt(e.target.value))
-                    }
-                    className="w-full bg-gray-700 text-gray-100 rounded-lg p-2 text-sm border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    required
-                  />
+                <div className="flex justify-between mt-6">
+                  <button
+                    onClick={() => setCurrentStep(1)}
+                    className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 border border-gray-300"
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={() => isApproved && setCurrentStep(3)}
+                    disabled={!isApproved}
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Continue
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {currentStep === 3 && (
+              <div className="space-y-6">
+                <h2 className="text-xl font-bold mb-4 text-gray-900">
+                  Auction Settings
+                </h2>
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-gray-700">
+                      Starting Price (DAT)
+                    </label>
+                    <input
+                      type="number"
+                      value={startingPrice}
+                      onChange={(e) =>
+                        setStartingPrice(parseFloat(e.target.value))
+                      }
+                      className="w-full bg-white border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-gray-700">
+                      Duration (hours)
+                    </label>
+                    <input
+                      type="number"
+                      value={duration}
+                      onChange={(e) => setDuration(parseFloat(e.target.value))}
+                      className="w-full bg-white border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      min="1"
+                    />
+                  </div>
+
+                  {auctionType === "1" && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium mb-1 text-gray-700">
+                          Price Decrement (DAT)
+                        </label>
+                        <input
+                          type="number"
+                          value={priceDecrement}
+                          onChange={(e) =>
+                            setPriceDecrement(parseFloat(e.target.value))
+                          }
+                          className="w-full bg-white border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          min="0"
+                          step="0.01"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-1 text-gray-700">
+                          Decrement Interval (Seconds)
+                        </label>
+                        <input
+                          type="number"
+                          value={decrementInterval}
+                          onChange={(e) =>
+                            setDecrementInterval(parseInt(e.target.value))
+                          }
+                          className="w-full bg-white border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          min="0"
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <div className="flex justify-between mt-6">
+                  <button
+                    onClick={() => setCurrentStep(2)}
+                    className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 border border-gray-300"
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={handleSubmit}
+                    disabled={loading}
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {loading ? "Creating..." : "Create Auction"}
+                  </button>
                 </div>
               </div>
             )}
           </div>
-
-          <button
-            type="submit"
-            disabled={loading || !isApproved}
-            className="w-full py-3 rounded-xl text-base font-bold bg-gradient-to-r from-blue-600 to-blue-500 
-              hover:from-blue-500 hover:to-blue-400 text-white transition-all disabled:opacity-50 
-              disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
-          >
-            {loading ? "Creating..." : "Create Auction"}
-          </button>
-        </form>
+        </div>
       </div>
     </div>
   );

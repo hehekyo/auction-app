@@ -1,11 +1,11 @@
- 'use client';
+"use client";
 
-import TokenSwap from '@/components/TokenSwap';
+import Trade from "@/components/Trade";
 
 export default function SwapPage() {
   return (
     <div className="container mx-auto p-6">
-      <TokenSwap />
+      <Trade />
     </div>
   );
 }

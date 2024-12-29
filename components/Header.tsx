@@ -1,12 +1,12 @@
-"use client"
-import { useState, useEffect } from 'react';
-import { useAccount } from 'wagmi';
-import Image from 'next/image';
-import { ConnectKitButton } from 'connectkit';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { FaWallet } from 'react-icons/fa';
-import TokenDrawer from './TokenDrawer';
+"use client";
+import { useState, useEffect } from "react";
+import { useAccount } from "wagmi";
+import Image from "next/image";
+import { ConnectKitButton } from "connectkit";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { FaWallet } from "react-icons/fa";
+import TokenDrawer from "./TokenDrawer";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -31,34 +31,34 @@ export default function Header() {
 
         {/* Desktop Navigation Menu */}
         <nav className="hidden md:flex items-center gap-6 font-bold ">
-        <Link 
+          <Link
             href="/"
             className={`hover:text-blue-400 transition ${
-              pathname === '/' ? 'text-blue-400' : ''
+              pathname === "/" ? "text-blue-400" : ""
             }`}
           >
             Home
           </Link>
-          <Link 
-            href="/swap"
+          <Link
+            href="/trade"
             className={`hover:text-blue-400 transition ${
-              pathname === '/swap' ? 'text-blue-400' : ''
+              pathname === "/trade" ? "text-blue-400" : ""
             }`}
           >
-            Swap
+            Trade
           </Link>
-          <Link 
+          <Link
             href="/auctions"
             className={`hover:text-blue-400 transition ${
-              pathname === '/auctions' ? 'text-blue-400' : ''
+              pathname === "/auctions" ? "text-blue-400" : ""
             }`}
           >
             Auctions
           </Link>
-          <Link 
+          <Link
             href="/nfts"
             className={`hover:text-blue-400 transition ${
-              pathname === '/nfts' ? 'text-blue-400' : ''
+              pathname === "/nfts" ? "text-blue-400" : ""
             }`}
           >
             NFTs
@@ -86,7 +86,9 @@ export default function Header() {
                 >
                   <FaWallet className="text-lg" />
                   <span className="hidden md:inline">
-                    {isConnected ? (ensName || truncatedAddress) : "Connect Wallet"}
+                    {isConnected
+                      ? ensName || truncatedAddress
+                      : "Connect Wallet"}
                   </span>
                 </button>
               );
@@ -100,7 +102,13 @@ export default function Header() {
         onClick={() => setIsMenuOpen(!isMenuOpen)}
         className="md:hidden block text-gray-200"
       >
-        <svg className="fill-current" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+        <svg
+          className="fill-current"
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+        >
           <title>menu</title>
           <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z"></path>
         </svg>
@@ -110,37 +118,37 @@ export default function Header() {
       {isMenuOpen && (
         <div className="md:hidden w-full mt-4">
           <nav className="flex flex-col gap-4">
-            <Link 
+            <Link
               href="/"
               className={`hover:text-blue-400 transition ${
-                pathname === '/' ? 'text-blue-400' : ''
+                pathname === "/" ? "text-blue-400" : ""
               }`}
               onClick={() => setIsMenuOpen(false)}
             >
               Home
             </Link>
-            <Link 
+            <Link
               href="/swap"
               className={`hover:text-blue-400 transition ${
-                pathname === '/swap' ? 'text-blue-400' : ''
+                pathname === "/swap" ? "text-blue-400" : ""
               }`}
               onClick={() => setIsMenuOpen(false)}
             >
               Swap
             </Link>
-            <Link 
+            <Link
               href="/auctions"
               className={`hover:text-blue-400 transition ${
-                pathname === '/auctions' ? 'text-blue-400' : ''
+                pathname === "/auctions" ? "text-blue-400" : ""
               }`}
               onClick={() => setIsMenuOpen(false)}
             >
               Auctions
             </Link>
-            <Link 
+            <Link
               href="/nfts"
               className={`hover:text-blue-400 transition ${
-                pathname === '/nfts' ? 'text-blue-400' : ''
+                pathname === "/nfts" ? "text-blue-400" : ""
               }`}
               onClick={() => setIsMenuOpen(false)}
             >
@@ -151,9 +159,9 @@ export default function Header() {
       )}
 
       {/* Token Balance Drawer */}
-      <TokenDrawer 
-        isOpen={isDrawerOpen} 
-        onClose={() => setIsDrawerOpen(false)} 
+      <TokenDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
       />
     </header>
   );

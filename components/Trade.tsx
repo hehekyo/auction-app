@@ -30,9 +30,7 @@ const TOKENS: Token[] = [
 ];
 
 export default function Trade() {
-  const [activeTab, setActiveTab] = useState<"swap" | "limit" | "send" | "buy">(
-    "swap"
-  );
+  const [activeTab, setActiveTab] = useState<"swap" | "send" | "buy">("swap");
   const [fromToken, setFromToken] = useState<Token>(TOKENS[0]);
   const [toToken, setToToken] = useState<Token>(TOKENS[1]);
   const [fromAmount, setFromAmount] = useState<string>("");
@@ -62,7 +60,7 @@ export default function Trade() {
   }, [fromAmount, fromToken]);
 
   return (
-    <div className="w-full max-w-xl mx-auto bg-white rounded-3xl p-4 shadow-lg">
+    <div className="w-full max-w-xl mx-auto bg-white rounded-3xl p-4 shadow-lg mt-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex space-x-4">
@@ -76,16 +74,7 @@ export default function Trade() {
           >
             Swap
           </button>
-          <button
-            onClick={() => setActiveTab("limit")}
-            className={`px-4 py-2 rounded-lg font-medium ${
-              activeTab === "limit"
-                ? "bg-gray-100 text-gray-900"
-                : "text-gray-500 hover:text-gray-900"
-            }`}
-          >
-            Limit
-          </button>
+
           <button
             onClick={() => setActiveTab("send")}
             className={`px-4 py-2 rounded-lg font-medium ${
@@ -117,7 +106,7 @@ export default function Trade() {
         {/* From Token */}
         <div className="bg-gray-50 rounded-2xl p-4">
           <div className="flex justify-between mb-2">
-            <span className="text-gray-500">You pay</span>
+            <span className="text-gray-500">Sell</span>
             <span className="text-gray-500">Balance: 0.0</span>
           </div>
           <div className="flex items-center justify-between">
@@ -149,7 +138,7 @@ export default function Trade() {
         {/* To Token */}
         <div className="bg-gray-50 rounded-2xl p-4">
           <div className="flex justify-between mb-2">
-            <span className="text-gray-500">You receive</span>
+            <span className="text-gray-500">Buy</span>
             <span className="text-gray-500">Balance: 0.0</span>
           </div>
           <div className="flex items-center justify-between">

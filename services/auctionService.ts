@@ -459,8 +459,8 @@ export class AuctionService {
             tokenURI: tokenURI,
             startingAt: auction.startingAt.toString(),
             endingAt: auction.endingAt.toString(),
-            startingPrice: auction.startingPrice,
-            highestBid: auction.highestBid,
+            startingPrice: auction.startingPrice.toString(),
+            highestBid: auction.highestBid.toString(),
             highestBidder: auction.highestBidder,
             bidders: auction.bidders.map((bid: any) => ({
               bidder: bid.bidder,

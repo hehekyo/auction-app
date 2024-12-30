@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { formatDistance } from "date-fns";
+import CopyAddressButton from "./CopyAddressButton";
 
 type AuctionStatus = "ongoing" | "ended";
 
@@ -198,7 +199,7 @@ export default function AuctionCard({
           <div className="flex justify-between">
             <span className="text-gray-400">NFT Contract</span>
             <span className="text-gray-200">
-              {`${nftAddress.slice(0, 6)}...${nftAddress.slice(-4)}`}
+              <CopyAddressButton address={nftAddress} />
             </span>
           </div>
 

@@ -7,15 +7,17 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "test": "jest",
+    "test": "tsx jest",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "monitor-start": "ts-node services/index.ts",
     "upload-nfts": "ts-node scripts/upload.ts",
-    "cids": "ts-node scripts/getIpfsCids.ts"
+    "cids": "ts-node scripts/getIpfsCids.ts",
+    "test1": "tsx utils/addresses/addresses.test.ts"
   },
   "dependencies": {
+    "@ethersproject/address": "^5.7.0",
     "@prisma/client": "^5.22.0",
     "@reduxjs/toolkit": "^2.0.1",
     "@tanstack/query-core": "^5.17.15",

@@ -6,12 +6,14 @@ import { ethers } from "ethers";
 import { FaEthereum, FaExchangeAlt } from "react-icons/fa";
 import { MdToken, MdKeyboardArrowDown, MdSettings } from "react-icons/md";
 import Image from "next/image";
+import TokenSelectModal from "./TokenSelectModal";
 
 // Token 类型定义
 interface Token {
   symbol: string;
   name: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
+  logoURI?: string;
   address?: string;
 }
 
@@ -20,11 +22,13 @@ const TOKENS: Token[] = [
     symbol: "ETH",
     name: "Ethereum",
     icon: <FaEthereum className="w-6 h-6 text-[#627EEA]" />,
+    logoURI: "https://token-icons.s3.amazonaws.com/eth.png",
   },
   {
     symbol: "DAT",
     name: "DAuction Token",
     icon: <MdToken className="w-6 h-6 text-blue-500" />,
+    logoURI: "/logo1.png",
   },
   // 可以添加更多代币
 ];
@@ -36,6 +40,8 @@ export default function Trade() {
   const [fromAmount, setFromAmount] = useState<string>("");
   const [toAmount, setToAmount] = useState<string>("");
   const { address, isConnected } = useAccount();
+  const [isSelectingFromToken, setIsSelectingFromToken] = useState(false);
+  const [isSelectingToToken, setIsSelectingToToken] = useState(false);
 
   // 处理代币交换
   const handleSwapTokens = () => {
@@ -115,10 +121,23 @@ export default function Trade() {
               value={fromAmount}
               onChange={(e) => setFromAmount(e.target.value)}
               placeholder="0"
-              className="text-3xl bg-transparent outline-none w-2/3"
+              className="text-4xl bg-transparent outline-none w-2/3"
             />
-            <button className="flex items-center gap-2 bg-white px-3 py-2 rounded-2xl hover:bg-gray-100">
-              {fromToken.icon}
+            <button
+              onClick={() => setIsSelectingFromToken(true)}
+              className="flex items-center gap-2 bg-white px-3 py-2 rounded-2xl hover:bg-gray-100"
+            >
+              {fromToken.logoURI ? (
+                <Image
+                  src={fromToken.logoURI}
+                  alt={fromToken.symbol}
+                  width={28}
+                  height={28}
+                  className="rounded-full"
+                />
+              ) : (
+                fromToken.icon
+              )}
               <span className="font-medium">{fromToken.symbol}</span>
               <MdKeyboardArrowDown className="w-5 h-5" />
             </button>
@@ -147,10 +166,23 @@ export default function Trade() {
               value={toAmount}
               readOnly
               placeholder="0"
-              className="text-3xl bg-transparent outline-none w-2/3"
+              className="text-4xl bg-transparent outline-none w-2/3"
             />
-            <button className="flex items-center gap-2 bg-white px-3 py-2 rounded-2xl hover:bg-gray-100">
-              {toToken.icon}
+            <button
+              onClick={() => setIsSelectingToToken(true)}
+              className="flex items-center gap-2 bg-white px-3 py-2 rounded-2xl hover:bg-gray-100"
+            >
+              {toToken.logoURI ? (
+                <Image
+                  src={toToken.logoURI}
+                  alt={toToken.symbol}
+                  width={28}
+                  height={28}
+                  className="rounded-full"
+                />
+              ) : (
+                toToken.icon
+              )}
               <span className="font-medium">{toToken.symbol}</span>
               <MdKeyboardArrowDown className="w-5 h-5" />
             </button>
@@ -184,6 +216,29 @@ export default function Trade() {
           ? "Enter Amount"
           : "Swap"}
       </button>
+
+      {/* Token Select Modals */}
+      <TokenSelectModal
+        isOpen={isSelectingFromToken}
+        onClose={() => setIsSelectingFromToken(false)}
+        onSelect={(token) => {
+          setFromToken(token);
+          setFromAmount("");
+          setToAmount("");
+        }}
+        selectedToken={fromToken}
+      />
+
+      <TokenSelectModal
+        isOpen={isSelectingToToken}
+        onClose={() => setIsSelectingToToken(false)}
+        onSelect={(token) => {
+          setToToken(token);
+          setFromAmount("");
+          setToAmount("");
+        }}
+        selectedToken={toToken}
+      />
     </div>
   );
 }

@@ -1797,6 +1797,11 @@
   resolved "https://registry.npmjs.org/@ungap/structured-clone/-/structured-clone-1.2.0.tgz"
   integrity sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==
 
+"@uniswap/token-lists@^1.0.0-beta.34":
+  version "1.0.0-beta.34"
+  resolved "https://registry.yarnpkg.com/@uniswap/token-lists/-/token-lists-1.0.0-beta.34.tgz#879461f5d4009327a24259bbab797e0f22db58c8"
+  integrity sha512-Hc3TfrFaupg0M84e/Zv7BoF+fmMWDV15mZ5s8ZQt2qZxUcNw2GQW+L6L/2k74who31G+p1m3GRYbJpAo7d1pqA==
+
 "@wagmi/connectors@5.5.3":
   version "5.5.3"
   resolved "https://registry.npmjs.org/@wagmi/connectors/-/connectors-5.5.3.tgz"
@@ -2464,6 +2469,15 @@ axios@^1.7.8:
   version "1.7.8"
   resolved "https://registry.npmjs.org/axios/-/axios-1.7.8.tgz"
   integrity sha512-Uu0wb7KNqK2t5K+YQyVCLM76prD5sRFjKHbJYCP1J7JFGEQ6nN7HWn9+04LAeiJ3ji54lgS/gZCH1oxyrf1SPw==
+  dependencies:
+    follow-redirects "^1.15.6"
+    form-data "^4.0.0"
+    proxy-from-env "^1.1.0"
+
+axios@^1.7.9:
+  version "1.7.9"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.7.9.tgz#d7d071380c132a24accda1b2cfc1535b79ec650a"
+  integrity sha512-LhLcE7Hbiryz8oMDdDptSrWowmB4Bl6RCt6sIJKpRB4XtVf0iEgewX3au/pJqm+Py1kCASkb/FFKjxQaLtxJvw==
   dependencies:
     follow-redirects "^1.15.6"
     form-data "^4.0.0"
@@ -5732,6 +5746,7 @@ next@14.0.4:
 "nextjs14-connectkit@file:.":
   version "0.1.0"
   dependencies:
+    "@ethersproject/address" "^5.7.0"
     "@prisma/client" "^5.22.0"
     "@reduxjs/toolkit" "^2.0.1"
     "@tanstack/query-core" "^5.17.15"
@@ -5749,7 +5764,7 @@ next@14.0.4:
     jsonwebtoken "^9.0.2"
     mime-types "^2.1.35"
     next "14.0.4"
-    nextjs14-connectkit "file:../../../../../Library/Caches/Yarn/v6/npm-nextjs14-connectkit-0.1.0-0dd2c601-9524-4947-9b0d-7e87ece776d0-1735519531376/node_modules/nextjs14-connectkit"
+    nextjs14-connectkit "file:../../../../../Library/Caches/Yarn/v6/npm-nextjs14-connectkit-0.1.0-ab496806-32f7-4724-8d1b-e86cdde23289-1735563832023/node_modules/nextjs14-connectkit"
     prisma "^5.22.0"
     react "^18"
     react-dom "^18"

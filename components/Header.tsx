@@ -21,12 +21,13 @@ export default function Header() {
           <Image
             src="/logo.png"
             alt="DAuction Logo"
-            width={80}
-            height={80}
-            className="w-[80px] h-[80px] object-contain rounded-full bg-white"
+            width={40}
+            height={40}
+            className="w-[40px] h-[40px] object-contain rounded-full"
             priority
             unoptimized
           />
+          <span className="text-2xl font-bold">DAuction</span>
         </Link>
 
         {/* Desktop Navigation Menu */}

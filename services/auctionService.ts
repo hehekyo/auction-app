@@ -474,7 +474,8 @@ export class AuctionService {
 
       console.log("============Active auctions:", activeAuctions);
       // 过滤出活跃的拍卖（状态为进行中的拍卖）
-      return activeAuctions.filter((auction) => auction.status === "1");
+      // return activeAuctions.filter((auction) => auction.status === "1");
+      return activeAuctions;
     } catch (error) {
       console.error("Failed to get active auctions:", error);
       throw error;

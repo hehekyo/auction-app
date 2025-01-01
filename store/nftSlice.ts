@@ -1,5 +1,5 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { NFTService } from '@/services/nftService';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import NFTService from "@/services/nftService";
 
 export interface NFT {
   id: string;
@@ -33,31 +33,35 @@ const initialState: NFTState = {
 const nftService = NFTService.getInstance();
 
 export const fetchNFTs = createAsyncThunk(
-  'nfts/fetchNFTs',
-  async () => {
+  "nfts/fetchNFTs",
+  async (owner: string) => {
     try {
-      const nfts = await nftService.getNFTs();
+      const nfts = await nftService.getNFTList(owner);
       return nfts;
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : 'Failed to fetch NFTs');
+      throw new Error(
+        error instanceof Error ? error.message : "Failed to fetch NFTs"
+      );
     }
   }
 );
 
 export const fetchNFTDetails = createAsyncThunk(
-  'nfts/fetchNFTDetails',
-  async (nftId: string) => {
+  "nfts/fetchNFTDetails",
+  async (tokenId: string) => {
     try {
-      const details = await nftService.getNFTDetails(nftId);
+      const details = await nftService.getNFTDetail(tokenId);
       return details;
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : 'Failed to fetch NFT details');
+      throw new Error(
+        error instanceof Error ? error.message : "Failed to fetch NFT details"
+      );
     }
   }
 );
 
 const nftSlice = createSlice({
-  name: 'nfts',
+  name: "nfts",
   initialState,
   reducers: {
     clearCurrentNFT: (state) => {
@@ -65,7 +69,7 @@ const nftSlice = createSlice({
     },
     clearError: (state) => {
       state.error = null;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -79,7 +83,7 @@ const nftSlice = createSlice({
       })
       .addCase(fetchNFTs.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Failed to fetch NFTs';
+        state.error = action.error.message || "Failed to fetch NFTs";
       })
       .addCase(fetchNFTDetails.pending, (state) => {
         state.loading = true;
@@ -91,10 +95,10 @@ const nftSlice = createSlice({
       })
       .addCase(fetchNFTDetails.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Failed to fetch NFT details';
+        state.error = action.error.message || "Failed to fetch NFT details";
       });
   },
 });
 
 export const { clearCurrentNFT, clearError } = nftSlice.actions;
-export default nftSlice.reducer; 
+export default nftSlice.reducer;

@@ -1,10 +1,10 @@
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useDisconnect, useAccount } from 'wagmi';
-import { FaSignOutAlt, FaImage } from 'react-icons/fa';
-import { useEffect, useState } from 'react';
-import MiniNFTCard from './MiniNFTCard';
-import { AuctionService } from '@/services/auctionService';
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useDisconnect, useAccount } from "wagmi";
+import { FaSignOutAlt, FaImage } from "react-icons/fa";
+import { useEffect, useState } from "react";
+import MiniNFTCard from "./MiniNFTCard";
+import { AuctionService } from "@/services/auctionService";
 
 interface TokenDrawerProps {
   isOpen: boolean;
@@ -32,16 +32,16 @@ export default function TokenDrawer({ isOpen, onClose }: TokenDrawerProps) {
   useEffect(() => {
     const fetchMyNFTs = async () => {
       if (!isOpen) return;
-      
+
       setLoading(true);
       try {
-        const response = await fetch('/api/nfts/my-nfts');
+        const response = await fetch("/api/nfts/my-nfts");
         if (response.ok) {
           const data = await response.json();
           setMyNFTs(data);
         }
       } catch (error) {
-        console.error('Failed to fetch NFTs:', error);
+        console.error("Failed to fetch NFTs:", error);
       } finally {
         setLoading(false);
       }
@@ -53,17 +53,17 @@ export default function TokenDrawer({ isOpen, onClose }: TokenDrawerProps) {
   useEffect(() => {
     const fetchBalances = async () => {
       if (!address || !isOpen) return;
-      
+
       setLoading(true);
       try {
-        console.log("===== account address",address);
-        
+        console.log("===== account address", address);
+
         const auctionService = AuctionService.getInstance();
         const balance = await auctionService.getDATBalance(address);
         setDatBalance(balance);
-        console.log("===== account balance",balance);
+        console.log("===== account balance", balance);
       } catch (error) {
-        console.error('Failed to fetch balances:', error);
+        console.error("Failed to fetch balances:", error);
       } finally {
         setLoading(false);
       }
@@ -76,17 +76,17 @@ export default function TokenDrawer({ isOpen, onClose }: TokenDrawerProps) {
     setIsDisconnecting(true);
     try {
       await disconnect();
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
       onClose();
     } catch (error) {
-      console.error('Disconnect failed:', error);
+      console.error("Disconnect failed:", error);
     } finally {
       setIsDisconnecting(false);
     }
   };
 
   const handleNFTClick = (id: string) => {
-    router.push(`/nfts/${id}`);
+    router.push(`/mynfts/${id}`);
     onClose();
   };
 
@@ -94,29 +94,29 @@ export default function TokenDrawer({ isOpen, onClose }: TokenDrawerProps) {
     <>
       {/* Backdrop */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/20 backdrop-blur-[2px] z-40"
           onClick={onClose}
         />
       )}
 
       {/* Drawer */}
-      <div className={`fixed top-[88px] bottom-0 right-0 w-80 transform transition-transform duration-300 ease-in-out z-50 
+      <div
+        className={`fixed top-[88px] bottom-0 right-0 w-80 transform transition-transform duration-300 ease-in-out z-50 
         rounded-l-2xl border-l border-t border-gray-700/50 backdrop-blur-md
-        bg-gray-800/70 ${
-        isOpen ? 'translate-x-0' : 'translate-x-full'
-      }`}>
+        bg-gray-800/70 ${isOpen ? "translate-x-0" : "translate-x-full"}`}
+      >
         <div className="p-6 flex flex-col h-full">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold text-white/90">My Wallet</h2>
-            <button 
-              onClick={onClose} 
+            <button
+              onClick={onClose}
               className="text-gray-400 hover:text-white w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-700/50 transition-colors"
             >
               ✕
             </button>
           </div>
-          
+
           <div className="space-y-4 flex-grow overflow-auto">
             <div className="bg-gray-700/30 rounded-xl p-4 backdrop-blur-sm border border-gray-600/20">
               <div className="flex items-center justify-between">
@@ -124,7 +124,9 @@ export default function TokenDrawer({ isOpen, onClose }: TokenDrawerProps) {
                 {loading ? (
                   <div className="animate-pulse h-6 w-24 bg-gray-600/50 rounded" />
                 ) : (
-                  <span className="text-white/90 font-bold">{datBalance} DAT</span>
+                  <span className="text-white/90 font-bold">
+                    {datBalance} DAT
+                  </span>
                 )}
               </div>
             </div>
@@ -157,22 +159,14 @@ export default function TokenDrawer({ isOpen, onClose }: TokenDrawerProps) {
               )}
             </div>
 
-            <Link 
-              href="/swap" 
-              className="block w-full text-center bg-blue-600/90 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition duration-200"
-              onClick={onClose}
-            >
-              Swap Tokens
-            </Link>
-
-            <Link 
-              href="/my-nfts" 
+            <Link
+              href="/mynfts"
               className="block w-full text-center bg-purple-600/90 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-xl transition duration-200"
               onClick={onClose}
             >
               <div className="flex items-center justify-center gap-2">
                 <FaImage />
-                <span>View All NFTs</span>
+                <span>View My NFTs</span>
               </div>
             </Link>
           </div>
@@ -183,7 +177,7 @@ export default function TokenDrawer({ isOpen, onClose }: TokenDrawerProps) {
             className={`mt-4 w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl 
               text-red-400 hover:text-red-300 hover:bg-red-500/10 
               border border-red-400 transition-colors
-              ${isDisconnecting ? 'opacity-50 cursor-not-allowed' : ''}`}
+              ${isDisconnecting ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             {isDisconnecting ? (
               <>
@@ -201,4 +195,4 @@ export default function TokenDrawer({ isOpen, onClose }: TokenDrawerProps) {
       </div>
     </>
   );
-} 
+}

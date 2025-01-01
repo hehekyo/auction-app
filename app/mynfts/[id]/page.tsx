@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { fetchNFTDetails, clearCurrentNFT } from '@/store/nftSlice';
+import { useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { fetchNFTDetails, clearCurrentNFT } from "@/store/nftSlice";
 
 export default function NFTDetailsPage() {
   const params = useParams();
@@ -33,9 +33,9 @@ export default function NFTDetailsPage() {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-center text-gray-400">
-          <p>{error || 'NFT not found'}</p>
+          <p>{error || "NFT not found"}</p>
           <button
-            onClick={() => router.push('/nfts')}
+            onClick={() => router.push("/mynfts")}
             className="mt-4 text-blue-500 hover:text-blue-400"
           >
             Back to NFTs
@@ -48,7 +48,7 @@ export default function NFTDetailsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <button
-        onClick={() => router.push('/nfts')}
+        onClick={() => router.push("/mynfts")}
         className="mb-6 text-gray-400 hover:text-gray-300 flex items-center gap-2"
       >
         ← Back to NFTs
@@ -66,8 +66,10 @@ export default function NFTDetailsPage() {
         </div>
 
         <div className="space-y-6">
-          <h1 className="text-4xl font-bold text-gray-100">{currentNFT.name}</h1>
-          
+          <h1 className="text-4xl font-bold text-gray-100">
+            {currentNFT.name}
+          </h1>
+
           <div className="bg-gray-800 rounded-xl p-6 space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-gray-400">Owner</span>
@@ -81,7 +83,9 @@ export default function NFTDetailsPage() {
 
             <div className="flex justify-between items-center">
               <span className="text-gray-400">Contract</span>
-              <span className="text-gray-200">{currentNFT.contractAddress}</span>
+              <span className="text-gray-200">
+                {currentNFT.contractAddress}
+              </span>
             </div>
 
             <div className="flex justify-between items-center">
@@ -93,11 +97,13 @@ export default function NFTDetailsPage() {
           </div>
 
           <div className="bg-gray-800 rounded-xl p-6">
-            <h2 className="text-xl font-bold text-gray-100 mb-4">Description</h2>
+            <h2 className="text-xl font-bold text-gray-100 mb-4">
+              Description
+            </h2>
             <p className="text-gray-300">{currentNFT.description}</p>
           </div>
         </div>
       </div>
     </div>
   );
-} 
+}

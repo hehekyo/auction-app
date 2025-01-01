@@ -57,12 +57,12 @@ export default function Header() {
             Auctions
           </Link>
           <Link
-            href="/nfts"
+            href="/pool"
             className={`hover:text-blue-400 transition ${
-              pathname === "/nfts" ? "text-blue-400" : ""
+              pathname === "/pool" ? "text-blue-400" : ""
             }`}
           >
-            NFTs
+            Pool
           </Link>
         </nav>
       </div>

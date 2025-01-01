@@ -105,6 +105,14 @@ export default function AuctionDetailsPage() {
                 </span>
               </div>
               <div className="flex justify-between items-center">
+                <span className="text-gray-400">Seller</span>
+                <span className="text-gray-200">
+                  <CopyAddressButton
+                    address={currentAuction?.auctionDetails.seller || ""}
+                  ></CopyAddressButton>
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
                 <span className="text-gray-400">NFT Contract</span>
                 <span className="text-gray-200">
                   <CopyAddressButton

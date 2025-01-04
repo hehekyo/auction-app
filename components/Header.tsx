@@ -15,7 +15,7 @@ export default function Header() {
   const pathname = usePathname();
 
   return (
-    <header className="lg:px-16 px-4 flex flex-wrap items-center py-2 shadow-lg bg-gray-900 text-gray-100 dark:bg-gray-800 relative">
+    <header className="lg:px-16 px-4 flex flex-wrap  items-center py-4 shadow-lg bg-gray-900 text-gray-100 dark:bg-gray-800 relative">
       <div className="flex-1 flex items-center gap-8">
         <Link href="/" className="flex items-center">
           <Image
@@ -41,14 +41,6 @@ export default function Header() {
             Home
           </Link>
           <Link
-            href="/trade"
-            className={`hover:text-blue-400 transition ${
-              pathname === "/trade" ? "text-blue-400" : ""
-            }`}
-          >
-            Trade
-          </Link>
-          <Link
             href="/auctions"
             className={`hover:text-blue-400 transition ${
               pathname === "/auctions" ? "text-blue-400" : ""
@@ -56,6 +48,23 @@ export default function Header() {
           >
             Auctions
           </Link>
+          <Link
+            href="/ad"
+            className={`hover:text-blue-400 transition ${
+              pathname === "/ad" ? "text-blue-400" : ""
+            }`}
+          >
+            Ad Deals
+          </Link>
+          <Link
+            href="/trade"
+            className={`hover:text-blue-400 transition ${
+              pathname === "/trade" ? "text-blue-400" : ""
+            }`}
+          >
+            Trade
+          </Link>
+
           <Link
             href="/pool"
             className={`hover:text-blue-400 transition ${

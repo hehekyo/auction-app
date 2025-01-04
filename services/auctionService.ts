@@ -459,12 +459,12 @@ export class AuctionService {
             tokenURI: tokenURI,
             startingAt: auction.startingAt.toString(),
             endingAt: auction.endingAt.toString(),
-            startingPrice: auction.startingPrice.toString(),
-            highestBid: auction.highestBid.toString(),
+            startingPrice: ethers.formatEther(auction.startingPrice), // 单位为 dat
+            highestBid: ethers.formatEther(auction.highestBid),
             highestBidder: auction.highestBidder,
             bidders: auction.bidders.map((bid: any) => ({
               bidder: bid.bidder,
-              bidAmount: bid.bidAmount.toString(),
+              bidAmount: ethers.formatEther(bid.bidAmount),
               bidTime: bid.bidTime.toString(),
             })),
             status: auction.status.toString(),
@@ -518,12 +518,12 @@ export class AuctionService {
         tokenId: auction.tokenId.toString(),
         startingAt: auction.startingAt.toString(),
         endingAt: auction.endingAt.toString(),
-        startingPrice: auction.startingPrice.toString(),
-        highestBid: auction.highestBid.toString(),
+        startingPrice: ethers.formatEther(auction.startingPrice), // 单位为 dat
+        highestBid: ethers.formatEther(auction.highestBid),
         highestBidder: auction.highestBidder,
         bidders: auction.bidders.map((bid: any) => ({
           bidder: bid.bidder,
-          bidAmount: bid.bidAmount.toString(),
+          bidAmount: ethers.formatEther(bid.bidAmount),
           bidTime: bid.bidTime.toString(),
         })),
         status: auction.status.toString(),
@@ -549,7 +549,7 @@ export class AuctionService {
     const provider = new ethers.BrowserProvider(window.ethereum);
     const signer = await provider.getSigner();
     const datContract = new ethers.Contract(
-      datTokenAddress,
+      datTokenAddress || "",
       datTokenAbi,
       signer
     );
@@ -705,7 +705,7 @@ export class AuctionService {
         provider
       );
 
-      const balance = await datContract.balanceOf(address);
+      const balance = ethers.formatEther(await datContract.balanceOf(address));
       const decimals = await datContract.decimals();
 
       return balance.toString();

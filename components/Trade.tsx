@@ -30,7 +30,6 @@ const TOKENS: Token[] = [
     icon: <MdToken className="w-6 h-6 text-blue-500" />,
     logoURI: "/logo1.png",
   },
-  // 可以添加更多代币
 ];
 
 export default function Trade() {
@@ -39,31 +38,10 @@ export default function Trade() {
   const [toToken, setToToken] = useState<Token>(TOKENS[1]);
   const [fromAmount, setFromAmount] = useState<string>("");
   const [toAmount, setToAmount] = useState<string>("");
+  const [toAddress, setToAddress] = useState<string>("");
   const { address, isConnected } = useAccount();
   const [isSelectingFromToken, setIsSelectingFromToken] = useState(false);
   const [isSelectingToToken, setIsSelectingToToken] = useState(false);
-
-  // 处理代币交换
-  const handleSwapTokens = () => {
-    const temp = fromToken;
-    setFromToken(toToken);
-    setToToken(temp);
-    setFromAmount("");
-    setToAmount("");
-  };
-
-  // 计算兑换金额
-  useEffect(() => {
-    if (fromAmount && !isNaN(Number(fromAmount))) {
-      const rate = 2000; // 示例汇率
-      const amount = Number(fromAmount);
-      const converted =
-        fromToken.symbol === "ETH" ? amount * rate : amount / rate;
-      setToAmount(converted.toFixed(6));
-    } else {
-      setToAmount("");
-    }
-  }, [fromAmount, fromToken]);
 
   return (
     <div className="w-full max-w-xl mx-auto bg-white rounded-3xl p-4 shadow-lg mt-8">
@@ -80,7 +58,6 @@ export default function Trade() {
           >
             Swap
           </button>
-
           <button
             onClick={() => setActiveTab("send")}
             className={`px-4 py-2 rounded-lg font-medium ${
@@ -91,153 +68,208 @@ export default function Trade() {
           >
             Send
           </button>
-          <button
-            onClick={() => setActiveTab("buy")}
-            className={`px-4 py-2 rounded-lg font-medium ${
-              activeTab === "buy"
-                ? "bg-gray-100 text-gray-900"
-                : "text-gray-500 hover:text-gray-900"
-            }`}
-          >
-            Buy
-          </button>
         </div>
         <button className="p-2 hover:bg-gray-100 rounded-lg">
           <MdSettings className="w-6 h-6 text-gray-600" />
         </button>
       </div>
 
-      {/* Swap Container */}
-      <div className="space-y-2">
-        {/* From Token */}
-        <div className="bg-gray-50 rounded-2xl p-4">
-          <div className="flex justify-between mb-2">
-            <span className="text-gray-500">Sell</span>
-            <span className="text-gray-500">Balance: 0.0</span>
+      {activeTab === "swap" ? (
+        // Swap Container
+        <div className="space-y-4">
+          {/* From Token */}
+          <div className="bg-gray-50 rounded-2xl p-4">
+            <div className="flex justify-between mb-2">
+              <span className="text-gray-500">From</span>
+              <span className="text-gray-500">Balance: 0.0</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <input
+                type="number"
+                value={fromAmount}
+                onChange={(e) => setFromAmount(e.target.value)}
+                placeholder="0"
+                className="text-4xl bg-transparent outline-none w-[200px] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+              <button
+                onClick={() => setIsSelectingFromToken(true)}
+                className="flex items-center gap-2 bg-white px-3 py-2 rounded-2xl hover:bg-gray-100"
+              >
+                {fromToken.logoURI ? (
+                  <Image
+                    src={fromToken.logoURI}
+                    alt={fromToken.symbol}
+                    width={28}
+                    height={28}
+                    className="rounded-full"
+                  />
+                ) : (
+                  fromToken.icon
+                )}
+                <span className="font-medium">{fromToken.symbol}</span>
+                <MdKeyboardArrowDown className="w-5 h-5" />
+              </button>
+            </div>
           </div>
-          <div className="flex items-center justify-between">
-            <input
-              type="number"
-              value={fromAmount}
-              onChange={(e) => setFromAmount(e.target.value)}
-              placeholder="0"
-              className="text-4xl bg-transparent outline-none w-2/3"
-            />
-            <button
-              onClick={() => setIsSelectingFromToken(true)}
-              className="flex items-center gap-2 bg-white px-3 py-2 rounded-2xl hover:bg-gray-100"
-            >
-              {fromToken.logoURI ? (
-                <Image
-                  src={fromToken.logoURI}
-                  alt={fromToken.symbol}
-                  width={28}
-                  height={28}
-                  className="rounded-full"
-                />
-              ) : (
-                fromToken.icon
-              )}
-              <span className="font-medium">{fromToken.symbol}</span>
-              <MdKeyboardArrowDown className="w-5 h-5" />
+
+          {/* Swap Icon */}
+          <div className="flex justify-center">
+            <button className="p-2 rounded-xl hover:bg-gray-100">
+              <FaExchangeAlt className="w-5 h-5 text-blue-500" />
             </button>
           </div>
-        </div>
 
-        {/* Swap Button */}
-        <div className="flex justify-center -my-2 z-10">
+          {/* To Token */}
+          <div className="bg-gray-50 rounded-2xl p-4">
+            <div className="flex justify-between mb-2">
+              <span className="text-gray-500">To</span>
+              <span className="text-gray-500">Balance: 0.0</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <input
+                type="number"
+                value={toAmount}
+                onChange={(e) => setToAmount(e.target.value)}
+                placeholder="0"
+                className="text-4xl bg-transparent outline-none w-[200px] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+              <button
+                onClick={() => setIsSelectingToToken(true)}
+                className="flex items-center gap-2 bg-white px-3 py-2 rounded-2xl hover:bg-gray-100"
+              >
+                {toToken.logoURI ? (
+                  <Image
+                    src={toToken.logoURI}
+                    alt={toToken.symbol}
+                    width={28}
+                    height={28}
+                    className="rounded-full"
+                  />
+                ) : (
+                  toToken.icon
+                )}
+                <span className="font-medium">{toToken.symbol}</span>
+                <MdKeyboardArrowDown className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Swap Button */}
           <button
-            onClick={handleSwapTokens}
-            className="bg-white border border-gray-200 rounded-xl p-2 hover:bg-gray-50"
+            disabled={!isConnected || !fromAmount}
+            className={`w-full mt-4 py-4 rounded-2xl text-lg font-semibold transition-colors
+              ${
+                isConnected && fromAmount
+                  ? "bg-blue-600 hover:bg-blue-700 text-white"
+                  : "bg-gray-100 text-gray-400 cursor-not-allowed"
+              }`}
           >
-            <FaExchangeAlt className="w-4 h-4 text-gray-600" />
+            {!isConnected
+              ? "Connect Wallet"
+              : !fromAmount
+              ? "Enter Amount"
+              : "Swap"}
           </button>
         </div>
-
-        {/* To Token */}
-        <div className="bg-gray-50 rounded-2xl p-4">
-          <div className="flex justify-between mb-2">
-            <span className="text-gray-500">Buy</span>
-            <span className="text-gray-500">Balance: 0.0</span>
+      ) : activeTab === "send" ? (
+        // Send Container
+        <div className="space-y-4">
+          {/* You're sending */}
+          <div>
+            <div className="text-gray-600 text-lg mb-2">You're sending</div>
+            <div className="bg-gray-50 rounded-2xl p-4">
+              <div className="flex justify-between mb-2">
+                <span className="text-gray-500">Amount</span>
+                <span className="text-gray-500">Balance: 0.0</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-4xl text-gray-900">$</span>
+                  <input
+                    type="number"
+                    value={fromAmount}
+                    onChange={(e) => setFromAmount(e.target.value)}
+                    placeholder="0"
+                    className="text-4xl bg-transparent outline-none w-32 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                </div>
+                <button
+                  onClick={() => setIsSelectingFromToken(true)}
+                  className="flex items-center gap-2 bg-white px-3 py-2 rounded-2xl hover:bg-gray-100"
+                >
+                  {fromToken.logoURI ? (
+                    <Image
+                      src={fromToken.logoURI}
+                      alt={fromToken.symbol}
+                      width={28}
+                      height={28}
+                      className="rounded-full"
+                    />
+                  ) : (
+                    fromToken.icon
+                  )}
+                  <span className="font-medium">{fromToken.symbol}</span>
+                  <MdKeyboardArrowDown className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="text-sm text-gray-500 mt-1">
+                0 {fromToken.symbol}
+              </div>
+            </div>
           </div>
-          <div className="flex items-center justify-between">
-            <input
-              type="number"
-              value={toAmount}
-              readOnly
-              placeholder="0"
-              className="text-4xl bg-transparent outline-none w-2/3"
-            />
-            <button
-              onClick={() => setIsSelectingToToken(true)}
-              className="flex items-center gap-2 bg-white px-3 py-2 rounded-2xl hover:bg-gray-100"
-            >
-              {toToken.logoURI ? (
-                <Image
-                  src={toToken.logoURI}
-                  alt={toToken.symbol}
-                  width={28}
-                  height={28}
-                  className="rounded-full"
-                />
-              ) : (
-                toToken.icon
-              )}
-              <span className="font-medium">{toToken.symbol}</span>
-              <MdKeyboardArrowDown className="w-5 h-5" />
-            </button>
+
+          {/* To Address */}
+          <div>
+            <div className="text-gray-600 mb-2">To</div>
+            <div className="bg-gray-50 rounded-2xl p-4">
+              <input
+                type="text"
+                value={toAddress}
+                onChange={(e) => setToAddress(e.target.value)}
+                placeholder="Wallet address or ENS name"
+                className="w-full bg-transparent outline-none text-gray-900"
+              />
+            </div>
           </div>
+
+          {/* Action Button */}
+          <button
+            disabled={!isConnected || !fromAmount || !toAddress}
+            className={`w-full mt-4 py-4 rounded-2xl text-lg font-semibold transition-colors
+              ${
+                isConnected && fromAmount && toAddress
+                  ? "bg-blue-600 hover:bg-blue-700 text-white"
+                  : "bg-gray-100 text-gray-400 cursor-not-allowed"
+              }`}
+          >
+            {!isConnected
+              ? "Connect Wallet"
+              : !fromAmount || !toAddress
+              ? "Enter Amount and Address"
+              : "Send"}
+          </button>
         </div>
-      </div>
+      ) : null}
 
-      {/* Exchange Info */}
-      <div className="mt-4 p-3 bg-gray-50 rounded-xl">
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-500">Exchange Rate</span>
-          <span className="text-gray-900">
-            1 {fromToken.symbol} = 2000 {toToken.symbol}
-          </span>
-        </div>
-      </div>
-
-      {/* Action Button */}
-      <button
-        disabled={!isConnected || !fromAmount || Number(fromAmount) <= 0}
-        className={`w-full mt-4 py-4 rounded-2xl text-lg font-semibold transition-colors
-          ${
-            isConnected && fromAmount && Number(fromAmount) > 0
-              ? "bg-blue-600 hover:bg-blue-700 text-white"
-              : "bg-gray-100 text-gray-400 cursor-not-allowed"
-          }`}
-      >
-        {!isConnected
-          ? "Connect Wallet"
-          : !fromAmount || Number(fromAmount) <= 0
-          ? "Enter Amount"
-          : "Swap"}
-      </button>
-
-      {/* Token Select Modals */}
+      {/* Token Select Modal */}
       <TokenSelectModal
-        isOpen={isSelectingFromToken}
-        onClose={() => setIsSelectingFromToken(false)}
-        onSelect={(token) => {
-          setFromToken(token);
-          setFromAmount("");
-          setToAmount("");
+        isOpen={isSelectingFromToken || isSelectingToToken}
+        onClose={() => {
+          setIsSelectingFromToken(false);
+          setIsSelectingToToken(false);
         }}
-        selectedToken={fromToken}
-      />
-
-      <TokenSelectModal
-        isOpen={isSelectingToToken}
-        onClose={() => setIsSelectingToToken(false)}
         onSelect={(token) => {
-          setToToken(token);
-          setFromAmount("");
-          setToAmount("");
+          if (isSelectingFromToken) {
+            setFromToken(token);
+            setFromAmount("");
+          } else {
+            setToToken(token);
+            setToAmount("");
+          }
+          setIsSelectingFromToken(false);
+          setIsSelectingToToken(false);
         }}
-        selectedToken={toToken}
+        selectedToken={isSelectingFromToken ? fromToken : toToken}
       />
     </div>
   );

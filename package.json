@@ -7,7 +7,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "test": "tsx jest",
+    "test": "jest",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -45,7 +45,7 @@
     "react-redux": "^9.0.4",
     "tailwind-variants": "^0.1.20",
     "viem": "2.x",
-    "wagmi": "^2.13.5",
+    "wagmi": "^2.14.6",
     "web3.storage": "^4.5.5",
     "yarn": "^1.22.21"
   },

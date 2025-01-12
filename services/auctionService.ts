@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 import EnglishAuctionABI from "../abi/EnglishAuction.json";
 import { BlockchainService } from "./blockchainService";
+// import { useAuctionContract } from "../hooks/useContract";
 
 export interface AuctionCreated {
   auctionType: string;
@@ -80,8 +81,9 @@ export class AuctionService {
         this.provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await this.provider.getSigner();
         if (!signer) {
-          console.error("Signer is not available. Please connect your wallet.");
-          return;
+          throw new Error(
+            "Signer is not available. Please connect your wallet."
+          );
         }
         const contractAddress =
           process.env.NEXT_PUBLIC_AUCTION_CONTRACT_ADDRESS;
@@ -155,6 +157,14 @@ export class AuctionService {
       const signer = await this.provider!.getSigner();
       const auctionAddress = await contract.getAddress();
       const signerAddress = await signer.getAddress();
+
+      // const auctionContract = useAuctionContract();
+
+      // console.log(
+      //   "============auctionContract useAuctionContract",
+      //   auctionContract,
+      //   auctionContract?.address
+      // );
 
       console.log("Checking NFT:", {
         nftAddress,
@@ -268,6 +278,8 @@ export class AuctionService {
       const signer = await this.provider!.getSigner();
       const signerAddress = await signer.getAddress();
 
+      const startingPriceWei = ethers.parseEther(startingPrice.toString());
+
       // 使用完整的 NFT 合约 ABI
       const nftAbi = [
         "function ownerOf(uint256 tokenId) view returns (address)",
@@ -289,7 +301,7 @@ export class AuctionService {
       }
 
       // 检查起始价格是否有效
-      if (startingPrice <= 0) {
+      if (startingPriceWei <= 0) {
         throw new Error("起始价格必须大于零");
       }
 
@@ -301,7 +313,7 @@ export class AuctionService {
       console.log("parameters", {
         nftAddress,
         tokenId,
-        startingPrice,
+        startingPriceWei,
         duration,
       });
 
@@ -309,7 +321,7 @@ export class AuctionService {
       const tx = await contract.createAuction(
         nftAddress,
         tokenId,
-        startingPrice,
+        startingPriceWei,
         duration
       );
       const receipt = await tx.wait();
@@ -326,7 +338,7 @@ export class AuctionService {
     const datTokenAddress = process.env.NEXT_PUBLIC_DAT_CONTRACT_ADDRESS;
     const provider = new ethers.BrowserProvider(window.ethereum);
     const datContract = new ethers.Contract(
-      datTokenAddress,
+      datTokenAddress || "",
       datTokenAbi,
       provider
     );
@@ -352,6 +364,8 @@ export class AuctionService {
       const signer = await this.provider!.getSigner();
       const auctionAddress = await contract.getAddress();
 
+      const bidAmountWei = ethers.parseEther(bidAmount);
+
       // 先进行批准
       const datTokenAddress = process.env.NEXT_PUBLIC_DAT_CONTRACT_ADDRESS;
       const datTokenAbi = [
@@ -359,7 +373,7 @@ export class AuctionService {
         "function allowance(address owner, address spender) view returns (uint256)",
       ];
       const datContract = new ethers.Contract(
-        datTokenAddress,
+        datTokenAddress || "",
         datTokenAbi,
         signer
       );
@@ -369,15 +383,25 @@ export class AuctionService {
         auctionAddress
       );
 
-      if (allowance < bidAmount) {
+      if (allowance < bidAmountWei) {
         console.log("Requesting approval for bid amount...");
-        const approveTx = await datContract.approve(auctionAddress, bidAmount);
+        const approveTx = await datContract.approve(
+          auctionAddress,
+          bidAmountWei
+        );
         await approveTx.wait(); // 等待批准交易确认
         console.log("Approval successful");
       }
 
       // 进行出价
-      const tx = await contract.bid(nftAddress, tokenId, bidAmount);
+
+      console.log("contract.bid parameters", {
+        nftAddress,
+        tokenId,
+        bidAmountWei,
+      });
+
+      const tx = await contract.bid(nftAddress, tokenId, bidAmountWei);
       await tx.wait(); // 等待出价交易确认
       console.log("Bid placed successfully:", tx.hash);
     } catch (error) {
@@ -450,7 +474,7 @@ export class AuctionService {
           const auctionId = this.generateAuctionId(nftAddress, tokenId);
 
           return {
-            actionType: "0",
+            auctionType: "0",
             transactionHash: event.transactionHash,
             auctionId: auctionId,
             seller: auction.seller,
@@ -599,7 +623,7 @@ export class AuctionService {
     const provider = new ethers.BrowserProvider(window.ethereum);
     const signer = await provider.getSigner();
     const datContract = new ethers.Contract(
-      datTokenAddress,
+      datTokenAddress || "",
       datTokenAbi,
       signer
     );
@@ -705,10 +729,13 @@ export class AuctionService {
         provider
       );
 
-      const balance = ethers.formatEther(await datContract.balanceOf(address));
+      const balance = (await datContract.balanceOf(address)).toString();
       const decimals = await datContract.decimals();
+      const formattedBalance = parseFloat(ethers.formatEther(balance)).toFixed(
+        2
+      );
 
-      return balance.toString();
+      return formattedBalance.toString();
     } catch (error) {
       console.error("Failed to get DAT balance:", error);
       throw error;

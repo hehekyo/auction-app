@@ -54,7 +54,7 @@ export default function Header() {
               pathname === "/ad" ? "text-blue-400" : ""
             }`}
           >
-            Ad Deals
+            Advertise
           </Link>
           <Link
             href="/trade"
@@ -145,6 +145,15 @@ export default function Header() {
               onClick={() => setIsMenuOpen(false)}
             >
               Swap
+            </Link>
+            <Link
+              href="/ad"
+              className={`hover:text-blue-400 transition ${
+                pathname === "/ad" ? "text-blue-400" : ""
+              }`}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Advertise
             </Link>
             <Link
               href="/auctions"

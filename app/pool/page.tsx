@@ -1,21 +1,25 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import React from "react";
 import Image from "next/image";
 import { FaCaretDown } from "react-icons/fa";
-
+import { useRouter } from "next/navigation";
+import { PoolService } from "@/services/poolService";
+import { usePublicClient } from "wagmi";
+import { PoolQueryService, PairInfo } from "@/services/poolQueryService";
 // Mock 数据
 const poolData = [
   {
     id: 1,
-    pair: "WBTC/ETH",
+    pair: "ETH/DAT",
     version: "v3",
     fee: "0.3%",
     tvl: "$155.1M",
     apr: "0.706%",
     volume24h: "$999.5K",
-    token0Icon: "https://s2.coinmarketcap.com/static/img/coins/64x64/2837.png", // WBTC logo
-    token1Icon: "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png", // ETH logo
+    token0Icon: "https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png", // ETH logo
+    token1Icon: "https://s2.coinmarketcap.com/static/img/coins/64x64/2837.png", // DAT logo
   },
   {
     id: 2,
@@ -108,6 +112,41 @@ const poolData = [
 ];
 
 export default function PoolPage() {
+  const publicClient = usePublicClient();
+  const router = useRouter();
+  const handleAddLiquidity = (pool: any) => {
+    router.push("/pool/add");
+  };
+
+  const [pools, setPools] = useState([]);
+  const [pairsInfo, setPairsInfo] = useState<PairInfo[]>([]);
+
+  //   useEffect(() => {
+  //     const fetchPools = async () => {
+  //       const poolService = new PoolService(publicClient);
+  //       const poolsData = await poolService.getAllPools();
+  //       console.log("===poolsData", poolsData);
+  //       //   setPools(poolsData);
+  //     };
+
+  //     if (publicClient) {
+  //       fetchPools();
+  //     }
+  //   }, [publicClient]);
+
+  useEffect(() => {
+    const fetchPairsInfo = async () => {
+      if (!publicClient) return;
+
+      const queryService = new PoolQueryService(publicClient);
+      const info = await queryService.getAllPairsInfo();
+      console.log("===pairsInfo", info);
+      setPairsInfo(info);
+    };
+
+    fetchPairsInfo();
+  }, [publicClient]);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8 text-gray-800">
@@ -116,9 +155,9 @@ export default function PoolPage() {
 
       <div className="bg-white rounded-xl overflow-hidden shadow-lg">
         {/* 表头 */}
-        <div className="grid grid-cols-7 gap-4 p-4 border-b border-gray-200 text-gray-600 bg-gray-50">
+        <div className="grid grid-cols-6 gap-4 p-4 border-b border-gray-200 text-gray-600 bg-gray-50">
           <div className="col-span-2"># Pool</div>
-          <div>Fee</div>
+
           <div className="flex items-center gap-1">
             TVL <FaCaretDown className="text-gray-400" />
           </div>
@@ -131,7 +170,7 @@ export default function PoolPage() {
         {poolData.map((pool) => (
           <div
             key={pool.id}
-            className="grid grid-cols-7 gap-4 p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors"
+            className="grid grid-cols-6 gap-4 p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors"
           >
             {/* 池信息和图标 */}
             <div className="col-span-2 flex items-center gap-4">
@@ -157,13 +196,9 @@ export default function PoolPage() {
                 </div>
                 <div>
                   <div className="font-medium text-gray-900">{pool.pair}</div>
-                  <div className="text-sm text-gray-500">{pool.version}</div>
                 </div>
               </div>
             </div>
-
-            {/* 费率 */}
-            <div className="flex items-center text-gray-600">{pool.fee}</div>
 
             {/* TVL */}
             <div className="flex items-center font-medium text-gray-900">
@@ -180,7 +215,10 @@ export default function PoolPage() {
 
             {/* 操作按钮 */}
             <div className="flex items-center justify-end">
-              <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+              <button
+                onClick={() => handleAddLiquidity(pool)}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              >
                 Add Liquidity
               </button>
             </div>

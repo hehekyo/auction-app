@@ -23,14 +23,14 @@ export default function Header() {
         <Link href="/" className="flex items-center">
           <Image
             src="/logo.png"
-            alt="DAuction Logo"
+            alt="DexFlow Logo"
             width={40}
             height={40}
             className="w-[40px] h-[40px] object-contain rounded-full"
             priority
             unoptimized
           />
-          <span className="text-2xl font-bold">DAuction</span>
+          <span className="text-2xl font-bold">DexFlow</span>
         </Link>
 
         {/* Desktop Navigation Menu */}

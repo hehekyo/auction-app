@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import AuctionCard from "@/components/AuctionCard";
+import AuctionCard from "@/components/auction/AuctionCard";
 import { FaPlus } from "react-icons/fa";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchAuctions } from "@/store/auctionSlice";

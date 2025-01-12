@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import CreateBidModal from "@/components/CreateBidModal";
+import CreateBidModal from "@/components/auction/CreateBidModal";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchAuctionDetail, clearCurrentAuction } from "@/store/auctionSlice";
 import { message } from "antd";

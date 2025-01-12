@@ -1,26 +1,31 @@
-import { useState, useEffect } from 'react';
-import { ContractService } from '../services/contractService';
+import { useState, useEffect } from "react";
+import { ContractService } from "../../services/contractService";
 
 type CreateAuctionModalProps = {
   isOpen: boolean;
   onClose: () => void;
 };
 
-export default function CreateAuctionModal({ isOpen, onClose }: CreateAuctionModalProps) {
-  const [sellerAddress, setSellerAddress] = useState('');
+export default function CreateAuctionModal({
+  isOpen,
+  onClose,
+}: CreateAuctionModalProps) {
+  const [sellerAddress, setSellerAddress] = useState("");
   const [minBid, setMinBid] = useState(0.5);
-  const [endTime, setEndTime] = useState('');
+  const [endTime, setEndTime] = useState("");
   const [auctionType, setAuctionType] = useState(0);
   const [startingPrice, setStartingPrice] = useState(0.5);
   const [reservePrice, setReservePrice] = useState(0.5);
   const [duration, setDuration] = useState(120);
-  const [nftContract, setNftContract] = useState('0x5FC8d32690cc91D4c39d9d3abcBD16989F875707');
+  const [nftContract, setNftContract] = useState(
+    "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"
+  );
   const [tokenId, setTokenId] = useState(0);
   const [priceDecrement, setPriceDecrement] = useState(0);
   const [decrementInterval, setDecrementInterval] = useState(0);
 
   useEffect(() => {
-    const wallet = localStorage.getItem('wallet');
+    const wallet = localStorage.getItem("wallet");
     if (wallet) {
       setSellerAddress(wallet);
     }
@@ -30,7 +35,7 @@ export default function CreateAuctionModal({ isOpen, onClose }: CreateAuctionMod
     try {
       const contractService = ContractService.getInstance();
       const durationInSeconds = Math.floor(duration * 3600);
-      
+
       const txHash = await contractService.createAuction(
         auctionType,
         startingPrice,
@@ -41,20 +46,22 @@ export default function CreateAuctionModal({ isOpen, onClose }: CreateAuctionMod
         priceDecrement,
         decrementInterval
       );
-      
-      console.log('Auction created successfully:', txHash);
-      alert('Auction created successfully!');
+
+      console.log("Auction created successfully:", txHash);
+      alert("Auction created successfully!");
       onClose();
     } catch (error) {
-      console.error('Error creating auction:', error);
+      console.error("Error creating auction:", error);
       if (error instanceof Error) {
-        if (error.message.includes('Please install MetaMask')) {
-          alert('Please install MetaMask wallet\nVisit https://metamask.io/download/ to install');
+        if (error.message.includes("Please install MetaMask")) {
+          alert(
+            "Please install MetaMask wallet\nVisit https://metamask.io/download/ to install"
+          );
         } else {
           alert(error.message);
         }
       } else {
-        alert('Failed to create auction');
+        alert("Failed to create auction");
       }
     }
   };
@@ -65,7 +72,7 @@ export default function CreateAuctionModal({ isOpen, onClose }: CreateAuctionMod
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
       <div className="bg-gray-800 text-gray-200 p-6 rounded-lg w-full max-w-md">
         <h2 className="text-2xl font-bold mb-4">Create New Auction</h2>
-        
+
         <label className="block mb-4">
           <span className="text-gray-300">Auction Type</span>
           <select
@@ -141,7 +148,9 @@ export default function CreateAuctionModal({ isOpen, onClose }: CreateAuctionMod
             </label>
 
             <label className="block mb-4">
-              <span className="text-gray-300">Decrement Interval (Seconds)</span>
+              <span className="text-gray-300">
+                Decrement Interval (Seconds)
+              </span>
               <input
                 type="number"
                 className="w-full p-2 mt-1 bg-gray-700 text-gray-100 border border-gray-600 rounded-md focus:outline-none"
@@ -170,4 +179,3 @@ export default function CreateAuctionModal({ isOpen, onClose }: CreateAuctionMod
     </div>
   );
 }
-

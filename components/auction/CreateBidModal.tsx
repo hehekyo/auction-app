@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { message, Steps } from "antd";
-import { AuctionService } from "../services/auctionService";
+import { AuctionService } from "../../services/auctionService";
 import { ethers } from "ethers";
 
 type CreateBidModalProps = {

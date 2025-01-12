@@ -25,7 +25,7 @@ export default function CreateAuctionPage() {
   const [nftContract, setNftContract] = useState(
     "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
   );
-  const [tokenId, setTokenId] = useState("1");
+  const [tokenId, setTokenId] = useState("10");
   const [nftInfo, setNftInfo] = useState<NFTInfo | null>(null);
   const [nftError, setNftError] = useState<string | null>(null);
   const [isApproving, setIsApproving] = useState(false);

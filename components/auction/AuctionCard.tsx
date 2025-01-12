@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { formatDistance } from "date-fns";
-import CopyAddressButton from "./CopyAddressButton";
+import CopyAddressButton from "../CopyAddressButton";
 
 type AuctionStatus = "ongoing" | "ended";
 

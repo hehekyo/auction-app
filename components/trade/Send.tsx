@@ -35,7 +35,9 @@ const TOKENS: Token[] = [
 export default function Send() {
   const [fromToken, setFromToken] = useState<Token>(TOKENS[0]);
   const [fromAmount, setFromAmount] = useState<string>("");
-  const [toAddress, setToAddress] = useState<string>("");
+  const [toAddress, setToAddress] = useState<string>(
+    "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+  );
   const [isSelectingFromToken, setIsSelectingFromToken] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [balance, setBalance] = useState<string>("0");

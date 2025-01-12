@@ -5,12 +5,15 @@ import Image from "next/image";
 import { ConnectKitButton } from "connectkit";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FaWallet } from "react-icons/fa";
+import { FaWallet, FaUserFriends } from "react-icons/fa";
 import TokenDrawer from "./TokenDrawer";
+import { Tooltip } from "react-tooltip";
+import InviteModal from "./InviteModal";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const { address, isConnected } = useAccount();
   const pathname = usePathname();
 
@@ -76,6 +79,30 @@ export default function Header() {
         </nav>
       </div>
 
+      {/* Invite Friends Button with Tooltip */}
+      <button
+        className="flex items-center gap-2 px-4 py-2 mr-4 bg-orange-600 hover:bg-orange-700 rounded-lg transition-colors"
+        data-tooltip-id="invite-tooltip"
+        data-tooltip-content="Invite each friend to earn 100 Tokens"
+        onClick={() => setIsInviteModalOpen(true)}
+      >
+        <FaUserFriends className="text-lg" />
+        <span>Invite</span>
+      </button>
+
+      <Tooltip
+        id="invite-tooltip"
+        place="bottom"
+        className="!bg-gray-900/90 !px-4 !py-2 !rounded-xl !backdrop-blur-sm !border !border-gray-700/50"
+        classNameArrow="!border-gray-900/90"
+        style={{
+          fontSize: "14px",
+          fontWeight: "500",
+          boxShadow:
+            "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+        }}
+      />
+
       {/* Wallet and Connect Button */}
       <div className="flex items-center gap-4">
         <div className="md:block">
@@ -93,6 +120,7 @@ export default function Header() {
                 <button
                   onClick={handleClick}
                   className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                  title="Invite each Friend For 100 DAT"
                 >
                   <FaWallet className="text-lg" />
                   <span className="hidden md:inline">
@@ -181,6 +209,13 @@ export default function Header() {
       <TokenDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
+      />
+
+      {/* Invite Modal */}
+      <InviteModal
+        isOpen={isInviteModalOpen}
+        onClose={() => setIsInviteModalOpen(false)}
+        userAddress={address || ""}
       />
     </header>
   );

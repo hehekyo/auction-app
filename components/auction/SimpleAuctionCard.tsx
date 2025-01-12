@@ -7,7 +7,7 @@ interface SimpleAuctionCardProps {
   title: string;
   currentBid: string;
   endingAt: number;
-  actionType: "English" | "Dutch";
+  auctionType: "English" | "Dutch";
   onClick: () => void;
 }
 
@@ -16,7 +16,7 @@ export default function SimpleAuctionCard({
   title,
   currentBid,
   endingAt,
-  actionType,
+  auctionType,
   onClick,
 }: SimpleAuctionCardProps) {
   return (
@@ -35,7 +35,7 @@ export default function SimpleAuctionCard({
           className="transition-transform hover:scale-105"
         />
         <div className="absolute top-2 right-2 px-3 py-1 bg-blue-600 text-white text-sm rounded-full">
-          {actionType}
+          {auctionType}
         </div>
       </div>
 

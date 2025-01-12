@@ -36,17 +36,6 @@ export default function Home() {
 
   return (
     <main className="min-h-screen relative">
-      {/* 背景图片 */}
-      <div className="fixed inset-0 -z-10">
-        <Image
-          src="/bg.jpg"
-          alt="Background"
-          fill
-          className="object-cover opacity-20"
-          priority
-        />
-      </div>
-
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -202,8 +191,8 @@ export default function Home() {
                     title={auction.title || `Auction #${auction.auctionId}`}
                     currentBid={auction.highestBid || auction.startingPrice}
                     endingAt={Number(auction.endingAt)}
-                    actionType={
-                      auction.actionType === "0" ? "English" : "Dutch"
+                    auctionType={
+                      auction.auctionType === "0" ? "English" : "Dutch"
                     }
                     onClick={() =>
                       router.push(`/auctions/${auction.auctionId}`)

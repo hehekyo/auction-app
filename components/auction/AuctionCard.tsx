@@ -7,7 +7,7 @@ type AuctionStatus = "ongoing" | "ended";
 
 type AuctionCardProps = {
   transactionHash: string;
-  actionType: string;
+  auctionType: string;
   auctionId: string;
   seller: string;
   nftAddress: string;
@@ -82,7 +82,7 @@ const getNFTMetadata = async (tokenURI: string) => {
 
 export default function AuctionCard({
   transactionHash,
-  actionType,
+  auctionType,
   auctionId,
   seller,
   nftAddress,
@@ -187,7 +187,7 @@ export default function AuctionCard({
           <div className="flex justify-between">
             <span className="text-gray-400">Type</span>
             <span className="text-gray-200">
-              {actionType === "0" ? "English" : "Dutch"} Auction
+              {auctionType === "0" ? "English" : "Dutch"} Auction
             </span>
           </div>
 

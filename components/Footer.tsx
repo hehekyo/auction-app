@@ -3,7 +3,7 @@ import { FaGithub, FaDiscord } from "react-icons/fa";
 export default function Footer() {
   return (
     <footer className="flex justify-center items-center gap-8 bg-gray-900 text-white p-4 text-center">
-      <p>© {new Date().getFullYear()} DAuction. All rights reserved.</p>
+      <p>© {new Date().getFullYear()} DexFlow. All rights reserved.</p>
       <div className="flex justify-center space-x-4">
         <a
           href="https://github.com/hehekyo/auction-app"

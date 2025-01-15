@@ -57,7 +57,7 @@ export default function Header() {
               pathname === "/ad" ? "text-blue-400" : ""
             }`}
           >
-            Advertise
+            Advertising
           </Link>
           <Link
             href="/trade"
@@ -181,7 +181,7 @@ export default function Header() {
               }`}
               onClick={() => setIsMenuOpen(false)}
             >
-              Advertise
+              Advertising
             </Link>
             <Link
               href="/auctions"

@@ -3844,15 +3844,6 @@ fraction.js@^4.3.7:
   resolved "https://registry.yarnpkg.com/fraction.js/-/fraction.js-4.3.7.tgz#06ca0085157e42fda7f9e726e79fefc4068840f7"
   integrity sha512-ZsDfxO51wGAXREY55a7la9LScWpwv9RxIrYABrlvOFBlH/ShPnrtsXeuUIfXKKOVicNxQ+o8JTbJvjS4M89yew==
 
-framer-motion@^11.11.17:
-  version "11.15.0"
-  resolved "https://registry.yarnpkg.com/framer-motion/-/framer-motion-11.15.0.tgz#93e5d1839d500ba9cab1d617959a36142a61212b"
-  integrity sha512-MLk8IvZntxOMg7lDBLw2qgTHHv664bYoYmnFTmE0Gm/FW67aOJk0WM3ctMcG+Xhcv+vh5uyyXwxvxhSeJzSe+w==
-  dependencies:
-    motion-dom "^11.14.3"
-    motion-utils "^11.14.3"
-    tslib "^2.4.0"
-
 framer-motion@^11.17.0:
   version "11.17.0"
   resolved "https://registry.yarnpkg.com/framer-motion/-/framer-motion-11.17.0.tgz#2c8fe7e008b3c5301efc6288a990cd5e73805353"
@@ -5492,22 +5483,12 @@ mipd@0.0.7:
   resolved "https://registry.yarnpkg.com/mipd/-/mipd-0.0.7.tgz#bb5559e21fa18dc3d9fe1c08902ef14b7ce32fd9"
   integrity sha512-aAPZPNDQ3uMTdKbuO2YmAw2TxLHO0moa4YKAyETM/DTj5FloZo+a+8tU+iv4GmW+sOxKLSRwcSFuczk+Cpt6fg==
 
-motion-dom@^11.14.3:
-  version "11.14.3"
-  resolved "https://registry.yarnpkg.com/motion-dom/-/motion-dom-11.14.3.tgz#725c72c0f1d0b632e42fdd8d13b69ecf9fe202c0"
-  integrity sha512-lW+D2wBy5vxLJi6aCP0xyxTxlTfiu+b+zcpVbGVFUxotwThqhdpPRSmX8xztAgtZMPMeU0WGVn/k1w4I+TbPqA==
-
 motion-dom@^11.16.4:
   version "11.16.4"
   resolved "https://registry.yarnpkg.com/motion-dom/-/motion-dom-11.16.4.tgz#7c18dbe8f8b0d4210a89992cda30f5926f003777"
   integrity sha512-2wuCie206pCiP2K23uvwJeci4pMFfyQKpWI0Vy6HrCTDzDCer4TsYtT7IVnuGbDeoIV37UuZiUr6SZMHEc1Vww==
   dependencies:
     motion-utils "^11.16.0"
-
-motion-utils@^11.14.3:
-  version "11.14.3"
-  resolved "https://registry.yarnpkg.com/motion-utils/-/motion-utils-11.14.3.tgz#cd4a413463739498411f82abb67b3dd58768b0f8"
-  integrity sha512-Xg+8xnqIJTpr0L/cidfTTBFkvRw26ZtGGuIhA94J9PQ2p4mEa06Xx7QVYZH0BP+EpMSaDlu+q0I0mmvwADPsaQ==
 
 motion-utils@^11.16.0:
   version "11.16.0"
@@ -5667,12 +5648,12 @@ next@14.0.4:
     date-fns "^4.1.0"
     dotenv "^16.4.5"
     ethers "^6.10.0"
-    framer-motion "^11.11.17"
+    framer-motion "^11.17.0"
     ipfs-http-client "^60.0.1"
     jsonwebtoken "^9.0.2"
     mime-types "^2.1.35"
     next "14.0.4"
-    nextjs14-connectkit "file:../../../../../Library/Caches/Yarn/v6/npm-nextjs14-connectkit-0.1.0-43e7e05c-85d8-4d7b-b135-d811f631073d-1736673411829/node_modules/nextjs14-connectkit"
+    nextjs14-connectkit "file:../../../../../Library/Caches/Yarn/v6/npm-nextjs14-connectkit-0.1.0-3ad157b1-f8c9-4c80-b3aa-504639cb84fa-1736689234957/node_modules/nextjs14-connectkit"
     prisma "^5.22.0"
     react "^18"
     react-dom "^18"

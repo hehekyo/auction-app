@@ -9,8 +9,8 @@ import { Providers } from "./providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "DAuction",
-  description: "DAuction",
+  title: "DexFlow",
+  description: "DexFlow",
   icons: {
     icon: "/favicon.ico",
   },

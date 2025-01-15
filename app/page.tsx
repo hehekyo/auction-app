@@ -213,7 +213,7 @@ export default function Home() {
           >
             <button
               onClick={() => router.push("/auctions")}
-              className="bg-gradient-to-r from-orange-600 to-red-600 text-white px-8 py-3 rounded-xl font-semibold hover:opacity-90 transition-opacity"
+              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-xl font-semibold hover:opacity-90 transition-opacity"
             >
               Explore Auctions
             </button>

@@ -62,22 +62,19 @@ export class SwapService {
     value: bigint;
   }) {
     try {
-      if (!this.walletClient.account) {
-        throw new Error("No account found in wallet client");
-      }
-      console.log("============swapExactETHForTokens====");
-      console.log("============parameters", amountOutMin, path, to, deadline);
+      const account = this.walletClient.account;
+      if (!account) throw new Error("Wallet account not available");
 
-      const hash = await this.routerContract.write.swapExactETHForTokens(
-        [amountOutMin, path, to, deadline],
-        {
-          value,
-          account: this.walletClient.account,
-        }
-      );
+      const { request } =
+        await this.routerContract.simulate.swapExactETHForTokens(
+          [amountOutMin, path, to, deadline],
+          { account: account.address, value }
+        );
+
+      const hash = await this.walletClient.writeContract(request);
       return hash;
     } catch (error) {
-      console.error("Failed to swap ETH for tokens:", error);
+      console.error("SwapExactETHForTokens failed:", error);
       throw error;
     }
   }

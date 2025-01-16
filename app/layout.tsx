@@ -5,6 +5,11 @@ import { ConnectkitProvider } from "./connectkit-provider";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Providers } from "./providers";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import MyApp from "./_app";
+
+const queryClient = new QueryClient();
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,23 +29,23 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Providers>
-          <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen flex flex-col">
-            <main className="flex-grow">
-              <ConnectkitProvider
-                customTheme={{
-                  "--ck-accent-color": "#00D54B",
-                  "--ck-accent-text-color": "#ffffff",
-                }}
-              >
-                {" "}
-                <Header />
-                {children}
-              </ConnectkitProvider>
-            </main>
-            <Footer />
-          </div>
-        </Providers>
+        {/* <Providers> */}
+        <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen flex flex-col">
+          <main className="flex-grow">
+            <ConnectkitProvider
+              customTheme={{
+                "--ck-accent-color": "#00D54B",
+                "--ck-accent-text-color": "#ffffff",
+              }}
+            >
+              <Header />
+              {children}
+            </ConnectkitProvider>
+          </main>
+          <Footer />
+        </div>
+
+        {/* </Providers> */}
       </body>
     </html>
   );
